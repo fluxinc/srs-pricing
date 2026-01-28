@@ -81,23 +81,6 @@
 
     .slider-value { font-size: 1.25rem; font-weight: 600; min-width: 80px; text-align: right; }
 
-    .discount-summary {
-      background: #1c1c1e;
-      border-radius: 12px;
-      padding: 1rem 1.5rem;
-      margin-bottom: 1.5rem;
-      border: 1px solid #2c2c2e;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    .discount-item { text-align: center; }
-    .discount-label { font-size: 0.75rem; color: #86868b; }
-    .discount-value { font-size: 1.25rem; font-weight: 600; color: #e84200; }
-
     .table-container {
       background: #1c1c1e;
       border-radius: 12px;
@@ -127,21 +110,6 @@
       font-size: 0.7rem;
       font-weight: 600;
       margin-left: 0.5rem;
-    }
-
-    .discount-bar-container {
-      width: 100%;
-      height: 8px;
-      background: #2c2c2e;
-      border-radius: 4px;
-      margin-top: 0.5rem;
-      overflow: hidden;
-    }
-    .discount-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #e84200, #ff6b35);
-      border-radius: 4px;
-      transition: width 0.3s ease;
     }
 
     .footer { margin-top: 2rem; text-align: center; color: #86868b; font-size: 0.875rem; }
@@ -189,26 +157,27 @@
       </div>
     </div>
 
-    <div class="discount-summary">
-      <div class="discount-item">
-        <div class="discount-label">Rate Discount</div>
-        <div class="discount-value" id="rateDiscount">0%</div>
-        <div class="discount-bar-container">
-          <div class="discount-bar" id="rateBar" style="width: 0%"></div>
-        </div>
-      </div>
-      <div class="discount-item">
-        <div class="discount-label">Duration Discount</div>
-        <div class="discount-value" id="durationDiscount">0%</div>
-        <div class="discount-bar-container">
-          <div class="discount-bar" id="durationBar" style="width: 0%"></div>
-        </div>
-      </div>
-    </div>
-
     <div class="chart-container">
-      <div class="chart-title">Total Spend: <span id="chartTitle">10-Year Commitment</span></div>
-      <div class="chart-subtitle" id="chartSavings" style="color: #e84200; font-size: 0.9rem; margin-bottom: 0.5rem;"></div>
+      <div class="chart-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+        <div>
+          <div class="chart-title" style="margin-bottom: 0.25rem;">Total Spend: <span id="chartTitle">10-Year Commitment</span></div>
+          <div class="chart-subtitle" id="chartSavings" style="color: #e84200; font-size: 0.9rem;"></div>
+        </div>
+        <div class="discount-badges" style="display: flex; gap: 1rem; text-align: center;">
+          <div>
+            <div style="font-size: 0.7rem; color: #86868b;">Rate</div>
+            <div id="rateDiscount" style="font-size: 1.1rem; font-weight: 600; color: #e84200;">0%</div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; color: #86868b;">Duration</div>
+            <div id="durationDiscount" style="font-size: 1.1rem; font-weight: 600; color: #e84200;">0%</div>
+          </div>
+          <div>
+            <div style="font-size: 0.7rem; color: #86868b;">Total Units</div>
+            <div id="totalUnits" style="font-size: 1.1rem; font-weight: 600;">0</div>
+          </div>
+        </div>
+      </div>
       <div class="chart-wrapper">
         <canvas id="savingsChart"></canvas>
       </div>
@@ -248,12 +217,7 @@
 
       document.getElementById('rateDiscount').textContent = PRICING.formatPercent(rateDisc);
       document.getElementById('durationDiscount').textContent = PRICING.formatPercent(durationDisc);
-
-      // Update discount bars (as % of max possible)
-      const rateBarPct = (rateDisc / CONFIG.discounts.maxRateDiscount) * 100;
-      const durationBarPct = (durationDisc / CONFIG.discounts.maxDurationDiscount) * 100;
-      document.getElementById('rateBar').style.width = rateBarPct + '%';
-      document.getElementById('durationBar').style.width = durationBarPct + '%';
+      document.getElementById('totalUnits').textContent = (rate * 12 * duration).toLocaleString();
 
       // Pricing table
       const tbody = document.querySelector('#pricingTable tbody');

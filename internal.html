@@ -275,6 +275,17 @@
       </div>
     </div>
 
+    <div class="grid">
+      <div class="panel">
+        <h2>Commitment Summary</h2>
+        <div class="cost-breakdown" id="commitmentSummary"></div>
+      </div>
+      <div class="panel">
+        <h2>Profitability Analysis</h2>
+        <div class="cost-breakdown" id="profitabilityAnalysis"></div>
+      </div>
+    </div>
+
     <div class="table-container">
       <div class="table-title">Margin by Commitment Level</div>
       <table id="marginTable">
@@ -432,6 +443,41 @@
         <div class="cost-row"><span>Hardware Reserve</span><span>-$${Math.round(annualHardwareReserve).toLocaleString()}</span></div>
         <div class="cost-row total"><span>Available for Labor</span><span>$${Math.round(availableForLabor).toLocaleString()}</span></div>
         <div class="cost-row total"><span>Labor Utilization</span><span class="${laborUtilization > 1 ? 'bad' : laborUtilization > 0.8 ? 'warning' : 'good'}">${Math.round(laborUtilization * 100)}%</span></div>
+      `;
+
+      // Commitment summary
+      const totalUnits = rate * 12 * duration;
+      const contractTotal = PRICING.contractPrice(rate, duration, contractYrs);
+      const unitCost = PRICING.year1Cost() + PRICING.year2Cost() * (contractYrs - 1);
+
+      document.getElementById('commitmentSummary').innerHTML = `
+        <div class="cost-row"><span>Rate</span><span>${rate} units/mo</span></div>
+        <div class="cost-row"><span>Commitment Duration</span><span>${duration} years</span></div>
+        <div class="cost-row"><span>Contract Length</span><span>${contractYrs} years/unit</span></div>
+        <div class="cost-row total"><span>Total Units Deployed</span><span>${totalUnits.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Price per Unit (${contractYrs}yr)</span><span>$${contractTotal.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Cost per Unit (${contractYrs}yr)</span><span>$${Math.round(unitCost).toLocaleString()}</span></div>
+      `;
+
+      // Profitability analysis over full commitment
+      const totalRevenue = totalUnits * contractTotal;
+      const totalUnitCosts = totalUnits * unitCost;
+      const totalOverhead = PRICING.annualOverhead() * duration;
+      const totalCosts = totalUnitCosts + totalOverhead;
+      const netProfit = totalRevenue - totalCosts;
+      const profitMargin = netProfit / totalRevenue;
+      const annualProfit = netProfit / duration;
+      const profitPerUnit = netProfit / totalUnits;
+
+      document.getElementById('profitabilityAnalysis').innerHTML = `
+        <div class="cost-row"><span>Total Revenue</span><span>$${Math.round(totalRevenue).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Unit Costs</span><span>$${Math.round(totalUnitCosts).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Overhead (${duration}yr)</span><span>$${Math.round(totalOverhead).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Costs</span><span>$${Math.round(totalCosts).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Net Profit</span><span class="${marginClass(profitMargin)}">$${Math.round(netProfit).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Profit Margin</span><span class="${marginClass(profitMargin)}">${Math.round(profitMargin * 100)}%</span></div>
+        <div class="cost-row"><span>Annual Profit</span><span>$${Math.round(annualProfit).toLocaleString()}/yr</span></div>
+        <div class="cost-row"><span>Profit per Unit</span><span>$${Math.round(profitPerUnit).toLocaleString()}/unit</span></div>
       `;
 
       // Margin table
