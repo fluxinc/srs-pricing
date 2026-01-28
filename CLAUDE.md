@@ -4,76 +4,105 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Flux pricing calculator for coach manufacturer deals (SRS model). Two-part pricing structure separating Year 1 (Sales) from Year 2+ (Service). Discounts emerge naturally as install base grows past the FTE cliff.
+Flux pricing calculator for coach manufacturer deals (SRS model). Two-part pricing structure separating Year 1 (Sales team) from Year 2+ (Support team). Simplified 2-layer discount model based on volume commitment and contract length.
 
 ## Pricing Model
 
-### Part Numbers
+### Part Numbers (by contract length)
 
-- `FX-SRS-Y1` — Year 1: Hardware + Build Labor + First Year Support (fixed price)
-- `FX-SRS-Y2` — Year 2+: Support + Hardware Reserve (price decreases with scale)
+- `FX-SRS-1YR` — 1-year contract per unit
+- `FX-SRS-3YR` — 3-year contract per unit
+- `FX-SRS-5YR` — 5-year contract per unit
+- `FX-SRS-10YR` — 10-year contract per unit
 
-### Key Parameters
+Each contract includes Year 1 pricing plus Year 2+ annual pricing for remaining years.
 
-```javascript
-const PARAMS = {
-  hardwareCost: 895,
-  hardwareReserveRate: 0.20,  // 20% annually for 5-year replacement
-  buildHoursPerUnit: 4,
-  supportHoursPerUnitYear: 8,
-  hourlyRate: 60,
-  fteSalary: 60000,
-  fteHours: 2000,
-  fteThreshold: 0.5,
-  targetMargin: 0.40,
-};
-```
-
-### Core Formulas
+### Base Prices (no commitment)
 
 ```javascript
-// FTE cliff occurs at this install base
-const fteCliffUnits = ceil(0.5 * (2000 / 8)) = 125 units
-
-// Year 1 cost (fixed)
-year1Cost = hardware + (buildHours * hourlyRate) + (supportHours * hourlyRate)
-          = 895 + 240 + 480 = $1,615
-year1Price = 1615 / 0.6 = $2,692
-
-// Year 2+ cost (varies with install base)
-if installBase < 125:
-  supportCost = 8 * $60 = $480/unit
-else:
-  supportCost = (ceil(installBase/250) * $60k) / installBase
-
-year2Cost = supportCost + ($895 * 0.20)
-year2Price = year2Cost / 0.6
-
-// At 125 units: ~$1,098  (0% discount)
-// At 250 units: ~$698    (36% discount)
+Year 1 base:  $3,600  (hardware + build + first year support)
+Year 2+ base: $1,550/year (support + hardware reserve)
+5-year total: $9,800  (Y1 + 4×Y2+)
 ```
 
-### The Discount Incentive
+### 2-Layer Discount Structure
 
-Higher order rates reach the FTE cliff faster, so Year 2+ costs drop sooner. This naturally incentivizes volume without sacrificing margin.
+**Layer 1: Volume Commitment (0-25%)**
+
+Based on total units committed = monthly rate × 12 × duration years
+
+| Total Commitment | Volume Discount |
+|------------------|-----------------|
+| 0-119 units      | 0%              |
+| 120-239 units    | 10%             |
+| 240-359 units    | 15%             |
+| 360-499 units    | 20%             |
+| 500+ units       | 25%             |
+
+- Year 1 gets **50%** of volume discount
+- Year 2+ gets **full** volume discount
+
+**Layer 2: Contract Length (0-18%)**
+
+| Contract | Discount |
+|----------|----------|
+| 1-year   | 0%       |
+| 3-year   | 3%       |
+| 5-year   | 5%       |
+| 10-year  | 18%      |
+
+### Example: 500 units + 5-year contract
+
+```javascript
+// Y1: 12.5% volume (25% × 0.5) + 5% contract = 17.5%
+Y1 = $3,600 × 0.825 = $2,970 → rounds to $3,000
+
+// Y2+: 25% volume + 5% contract = 30%
+Y2+ = $1,550 × 0.70 = $1,085 → rounds to $1,100/year
+
+// Total 5-year contract
+Total = $3,000 + (4 × $1,100) = $7,400/unit
+```
+
+### Costs & Margins
+
+```javascript
+// Costs (from config.js)
+Y1 cost:  $1,475 (hardware $950 + build 3hrs + support 8hrs + coord 4hrs @ $35/hr)
+Y2+ cost: $470/year (support 8hrs @ $35/hr + hardware reserve $190/yr)
+
+// Margins at max discount (43% off Y2+)
+Y1 margin:  42% ($2,550 price, $1,475 cost)
+Y2+ margin: 48% ($900 price, $470 cost)
+```
+
+### Key Design Decisions
+
+1. **Y2+ priced higher than original table** — captures $1M+ more over deal lifetime
+2. **Healthy margins maintained** — never drops below 40% even at max discount
+3. **Commitment-based** — rewards upfront volume commitment, not just fleet size
+4. **Separate part numbers** — Sales team sells Y1, Support team sells Y2+
 
 ## Calculator Web App
 
-A single-page app with:
+**Files:**
+- `config.js` — pricing parameters and discount tiers
+- `pricing.js` — calculation functions
+- `index.html` — customer-facing calculator
+- `internal.html` — internal margin analysis
 
 **Inputs:**
-
-- Monthly order rate slider (5-50 units/mo)
-- Projection period (1, 2, 3, 5 years)
+- Monthly order rate slider (10-25 units/mo)
+- Commitment duration slider (1-10 years)
+- Contract length buttons (1/3/5/10 year)
 
 **Outputs:**
+- Total commitment display (derived)
+- Volume tier table with current tier highlighted
+- Per-unit pricing table by contract length
+- Discount breakdown (Volume + Contract)
 
-- Price over time chart (Year 2+ price vs months)
-- FTE cliff indicator
-- Discount % achieved
-- Cumulative cost projection
-
-**Tech:** Vanilla JS or React, Chart.js, client-side only (no backend)
+**Tech:** Vanilla JS, Chart.js, client-side only
 
 ## External Tools
 

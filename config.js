@@ -52,43 +52,20 @@ const CONFIG = {
   },
 
   // ============================================================
-  // COMMITMENT DISCOUNTS (rate + duration)
+  // VOLUME COMMITMENT DISCOUNTS
+  // Based on total units committed = rate × 12 × duration
   // ============================================================
   discounts: {
-    // Rate commitment (monthly order rate)
-    minRate: 0,                       // Minimum rate for discount calculation
-    maxRate: 20,                      // Rate at which max discount is reached
-    maxRateDiscount: 0.25,            // Max discount from rate commitment (25%)
-
-    // Duration commitment (years of purchasing)
-    minDuration: 0,                   // Minimum duration for discount calculation
-    maxDuration: 10,                  // Duration at which max discount is reached
-    maxDurationDiscount: 0.18,        // Max discount from duration commitment (18%)
-
-    // Year 1 discount factor (commitment discounts apply at reduced rate to Y1)
-    year1DiscountFactor: 0.5,         // Y1 gets 50% of the commitment discount
-  },
-
-  // ============================================================
-  // FLEET DISCOUNT TIERS
-  // ============================================================
-  fleetDiscounts: {
-    // Year 1 volume discount (based on units ordered)
-    // Sorted descending by minUnits for lookup efficiency
-    year1Tiers: [
-      { minUnits: 250, discount: 0.17 },  // 250+ units: 17% off Y1
-      { minUnits: 100, discount: 0.11 },  // 100-249 units: 11% off Y1
-      { minUnits: 50, discount: 0.06 },   // 50-99 units: 6% off Y1
+    // Volume commitment tiers (sorted descending by minUnits)
+    volumeTiers: [
+      { minUnits: 500, discount: 0.25 },  // 500+ units: 25% off
+      { minUnits: 360, discount: 0.20 },  // 360-499 units: 20% off
+      { minUnits: 240, discount: 0.15 },  // 240-359 units: 15% off
+      { minUnits: 120, discount: 0.10 },  // 120-239 units: 10% off
     ],
 
-    // Year 2+ fleet discount (based on deployed fleet size)
-    // Sorted descending by minUnits for lookup efficiency
-    year2Tiers: [
-      { minUnits: 500, discount: 0.29 },  // 500+ units: 29% off Y2+
-      { minUnits: 250, discount: 0.23 },  // 250-499 units: 23% off Y2+
-      { minUnits: 100, discount: 0.16 },  // 100-249 units: 16% off Y2+
-      { minUnits: 50, discount: 0.10 },   // 50-99 units: 10% off Y2+
-    ],
+    // Year 1 gets reduced volume discount
+    year1VolumeFactor: 0.5,           // Y1 gets 50% of the volume discount
   },
 
   // ============================================================
@@ -96,8 +73,12 @@ const CONFIG = {
   // ============================================================
   contractDiscounts: {
     1: 0.00,                          // 1-year contract: no discount
-    3: 0.05,                          // 3-year contract: 5% off
-    5: 0.10,                          // 5-year contract: 10% off
-    10: 0.15,                         // 10-year contract: 15% off
+    3: 0.03,                          // 3-year contract: 3% off
+    5: 0.05,                          // 5-year contract: 5% off
+    10: 0.18,                         // 10-year contract: 18% off
   },
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = CONFIG;
+}

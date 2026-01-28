@@ -1,0 +1,10 @@
+# GitHub Pages Jekyll configuration
+# Exclude internal/definition files from being served
+
+exclude:
+  - CLAUDE.md
+  - README.md
+  - SRS_FTE_PRICING_MODEL.md
+  - internal.html
+  - .gitignore
+  - _config.yml

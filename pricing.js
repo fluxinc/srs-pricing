@@ -1,12 +1,13 @@
 /**
- * Flux Mobile SRS Bridge Pricing Model - Fleet Discount Program
+ * Flux Mobile SRS Bridge Pricing Model - Simplified 2-Layer Discount
  *
  * Pricing structure:
  * - Base prices for Year 1 and Year 2+
- * - Contract length discounts (1/3/5/10 year)
- * - Fleet discounts: Additional discount based on fleet size
- *   - Year 1 volume discount: Based on units ordered
- *   - Year 2+ fleet discount: Based on total deployed fleet
+ * - Layer 1: Volume commitment (total units = rate × 12 × duration)
+ * - Layer 2: Contract length discounts (1/3/5/10 year)
+ *
+ * Year 1 gets reduced volume discount (50% of full discount)
+ * Year 2+ gets full volume discount
  *
  * Part numbers (per unit, by contract length):
  * - FX-SRS-1YR: 1-year contract
@@ -77,68 +78,32 @@ const PRICING = {
   },
 
   // ============================================================
-  // COMMITMENT DISCOUNT CALCULATIONS (rate + duration)
+  // VOLUME COMMITMENT CALCULATIONS
   // ============================================================
 
   /**
-   * Rate discount based on monthly order rate commitment
-   * Linear interpolation from minRate to maxRate
+   * Calculate total commitment (total units = rate × 12 × duration)
    */
-  rateDiscount(monthlyRate) {
-    const { minRate, maxRate, maxRateDiscount } = CONFIG.discounts;
-    if (monthlyRate <= minRate) return 0;
-    if (monthlyRate >= maxRate) return maxRateDiscount;
-    return ((monthlyRate - minRate) / (maxRate - minRate)) * maxRateDiscount;
+  totalCommitment(monthlyRate, commitYears) {
+    return monthlyRate * 12 * commitYears;
   },
 
   /**
-   * Duration discount based on commitment years
-   * Linear interpolation from minDuration to maxDuration
+   * Volume discount based on total units committed
    */
-  durationDiscount(commitYears) {
-    const { minDuration, maxDuration, maxDurationDiscount } = CONFIG.discounts;
-    if (commitYears <= minDuration) return 0;
-    if (commitYears >= maxDuration) return maxDurationDiscount;
-    return ((commitYears - minDuration) / (maxDuration - minDuration)) * maxDurationDiscount;
-  },
-
-  /**
-   * Combined commitment discount (rate + duration)
-   */
-  commitmentDiscount(monthlyRate, commitYears) {
-    return this.rateDiscount(monthlyRate) + this.durationDiscount(commitYears);
-  },
-
-  // ============================================================
-  // FLEET DISCOUNT CALCULATIONS
-  // ============================================================
-
-  /**
-   * Year 1 volume discount (based on units ordered)
-   */
-  year1VolumeDiscount(unitsOrdered) {
-    for (const tier of CONFIG.fleetDiscounts.year1Tiers) {
-      if (unitsOrdered >= tier.minUnits) return tier.discount;
+  volumeDiscount(totalUnits) {
+    for (const tier of CONFIG.discounts.volumeTiers) {
+      if (totalUnits >= tier.minUnits) return tier.discount;
     }
     return 0;
   },
 
   /**
-   * Year 2+ fleet discount (based on deployed fleet size)
+   * Get the current volume tier info
    */
-  year2FleetDiscount(fleetSize) {
-    for (const tier of CONFIG.fleetDiscounts.year2Tiers) {
-      if (fleetSize >= tier.minUnits) return tier.discount;
-    }
-    return 0;
-  },
-
-  /**
-   * Get the current fleet discount tier info
-   */
-  getFleetTier(fleetSize) {
-    for (const tier of CONFIG.fleetDiscounts.year2Tiers) {
-      if (fleetSize >= tier.minUnits) {
+  getVolumeTier(totalUnits) {
+    for (const tier of CONFIG.discounts.volumeTiers) {
+      if (totalUnits >= tier.minUnits) {
         return { minUnits: tier.minUnits, discount: tier.discount };
       }
     }
@@ -146,12 +111,12 @@ const PRICING = {
   },
 
   /**
-   * Get the next fleet discount tier
+   * Get the next volume tier
    */
-  getNextFleetTier(fleetSize) {
-    const tiers = CONFIG.fleetDiscounts.year2Tiers;
+  getNextVolumeTier(totalUnits) {
+    const tiers = CONFIG.discounts.volumeTiers;
     for (let i = tiers.length - 1; i >= 0; i--) {
-      if (fleetSize < tiers[i].minUnits) {
+      if (totalUnits < tiers[i].minUnits) {
         return { minUnits: tiers[i].minUnits, discount: tiers[i].discount };
       }
     }
@@ -177,15 +142,16 @@ const PRICING = {
   },
 
   /**
-   * Year 1 price per unit (with all 4 discount layers)
-   * Layers: rate + duration + contract (fleet discount does NOT apply to Y1)
-   * Commitment discounts apply at reduced rate (year1DiscountFactor)
+   * Year 1 price per unit (with 2 discount layers)
+   * Layer 1: Volume discount (at reduced rate - year1VolumeFactor)
+   * Layer 2: Contract discount (full)
    */
   year1Price(monthlyRate, commitYears, contractYears) {
     const basePrice = this.year1Base;
-    const commitDisc = this.commitmentDiscount(monthlyRate, commitYears) * CONFIG.discounts.year1DiscountFactor;
+    const totalUnits = this.totalCommitment(monthlyRate, commitYears);
+    const volumeDisc = this.volumeDiscount(totalUnits) * CONFIG.discounts.year1VolumeFactor;
     const contractDisc = this.contractDiscount(contractYears);
-    const totalDisc = commitDisc + contractDisc;
+    const totalDisc = volumeDisc + contractDisc;
     return this.roundUp50(basePrice * (1 - totalDisc));
   },
 
@@ -193,8 +159,9 @@ const PRICING = {
    * Year 1 total discount
    */
   year1TotalDiscount(monthlyRate, commitYears, contractYears) {
-    const commitDisc = this.commitmentDiscount(monthlyRate, commitYears) * CONFIG.discounts.year1DiscountFactor;
-    return commitDisc + this.contractDiscount(contractYears);
+    const totalUnits = this.totalCommitment(monthlyRate, commitYears);
+    const volumeDisc = this.volumeDiscount(totalUnits) * CONFIG.discounts.year1VolumeFactor;
+    return volumeDisc + this.contractDiscount(contractYears);
   },
 
   /**
@@ -205,33 +172,33 @@ const PRICING = {
   },
 
   /**
-   * Year 2+ price per unit per year (with all 4 discount layers)
-   * Layers: rate + duration + contract + fleet
+   * Year 2+ price per unit per year (with 2 discount layers)
+   * Layer 1: Volume discount (full)
+   * Layer 2: Contract discount (full)
    */
-  year2Price(monthlyRate, commitYears, contractYears, fleetSize = 0) {
+  year2Price(monthlyRate, commitYears, contractYears) {
     const basePrice = CONFIG.prices.year2;
-    const commitDisc = this.commitmentDiscount(monthlyRate, commitYears);
+    const totalUnits = this.totalCommitment(monthlyRate, commitYears);
+    const volumeDisc = this.volumeDiscount(totalUnits);
     const contractDisc = this.contractDiscount(contractYears);
-    const fleetDisc = this.year2FleetDiscount(fleetSize);
-    const totalDisc = commitDisc + contractDisc + fleetDisc;
+    const totalDisc = volumeDisc + contractDisc;
     return this.roundUp50(basePrice * (1 - totalDisc));
   },
 
   /**
-   * Year 2+ total discount (all 4 layers)
+   * Year 2+ total discount (2 layers)
    */
-  year2TotalDiscount(monthlyRate, commitYears, contractYears, fleetSize) {
-    return this.commitmentDiscount(monthlyRate, commitYears) +
-           this.contractDiscount(contractYears) +
-           this.year2FleetDiscount(fleetSize);
+  year2TotalDiscount(monthlyRate, commitYears, contractYears) {
+    const totalUnits = this.totalCommitment(monthlyRate, commitYears);
+    return this.volumeDiscount(totalUnits) + this.contractDiscount(contractYears);
   },
 
   /**
    * Total contract price per unit
    */
-  contractPrice(monthlyRate, commitYears, contractYears, fleetSize = 0) {
+  contractPrice(monthlyRate, commitYears, contractYears) {
     const y1 = this.year1Price(monthlyRate, commitYears, contractYears);
-    const y2 = this.year2Price(monthlyRate, commitYears, contractYears, fleetSize);
+    const y2 = this.year2Price(monthlyRate, commitYears, contractYears);
     return y1 + (y2 * Math.max(0, contractYears - 1));
   },
 
@@ -267,8 +234,8 @@ const PRICING = {
   /**
    * Year 2+ margin
    */
-  year2Margin(monthlyRate, commitYears, contractYears, fleetSize = 0) {
-    const price = this.year2Price(monthlyRate, commitYears, contractYears, fleetSize);
+  year2Margin(monthlyRate, commitYears, contractYears) {
+    const price = this.year2Price(monthlyRate, commitYears, contractYears);
     const cost = this.year2Cost();
     return (price - cost) / price;
   },
@@ -276,17 +243,17 @@ const PRICING = {
   /**
    * Year 2+ margin including amortized overhead
    */
-  year2MarginWithOverhead(monthlyRate, commitYears, contractYears, fleetSize) {
-    const price = this.year2Price(monthlyRate, commitYears, contractYears, fleetSize);
-    const cost = this.year2Cost() + this.overheadPerUnit(fleetSize);
+  year2MarginWithOverhead(monthlyRate, commitYears, contractYears, totalUnits) {
+    const price = this.year2Price(monthlyRate, commitYears, contractYears);
+    const cost = this.year2Cost() + this.overheadPerUnit(totalUnits);
     return (price - cost) / price;
   },
 
   /**
    * Contract margin
    */
-  contractMargin(monthlyRate, commitYears, contractYears, fleetSize = 0) {
-    const price = this.contractPrice(monthlyRate, commitYears, contractYears, fleetSize);
+  contractMargin(monthlyRate, commitYears, contractYears) {
+    const price = this.contractPrice(monthlyRate, commitYears, contractYears);
     const cost = this.year1Cost() + (this.year2Cost() * Math.max(0, contractYears - 1));
     return (price - cost) / price;
   },
@@ -294,15 +261,16 @@ const PRICING = {
   /**
    * Get total discount breakdown for display
    */
-  getDiscountBreakdown(monthlyRate, commitYears, contractYears, fleetSize = 0) {
+  getDiscountBreakdown(monthlyRate, commitYears, contractYears) {
+    const totalUnits = this.totalCommitment(monthlyRate, commitYears);
+    const volumeDisc = this.volumeDiscount(totalUnits);
     return {
-      rate: this.rateDiscount(monthlyRate),
-      duration: this.durationDiscount(commitYears),
-      commitment: this.commitmentDiscount(monthlyRate, commitYears),
+      volume: volumeDisc,
+      volumeY1: volumeDisc * CONFIG.discounts.year1VolumeFactor,
       contract: this.contractDiscount(contractYears),
-      fleet: this.year2FleetDiscount(fleetSize),
       totalY1: this.year1TotalDiscount(monthlyRate, commitYears, contractYears),
-      totalY2: this.year2TotalDiscount(monthlyRate, commitYears, contractYears, fleetSize),
+      totalY2: this.year2TotalDiscount(monthlyRate, commitYears, contractYears),
+      totalUnits: totalUnits,
     };
   },
 
@@ -324,5 +292,8 @@ const PRICING = {
 };
 
 if (typeof module !== 'undefined' && module.exports) {
+  if (typeof CONFIG === 'undefined') {
+    global.CONFIG = require('./config.js');
+  }
   module.exports = { CONFIG, PRICING };
 }

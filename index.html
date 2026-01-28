@@ -272,36 +272,32 @@
       <h1>Flux Mobile SRS Bridge</h1>
     </div>
     <p class="subtitle">
-      <span class="tagline">Fleet Discount Program: "Grow With Us, Share the Savings"</span>
+      <span class="tagline">Volume Discount Program: "Commit More, Save More"</span>
     </p>
 
     <div class="controls">
       <div class="control-row">
         <div>
-          <label>Monthly Commitment (units/mo)</label>
+          <label>Monthly Order Rate (units/mo)</label>
           <div class="slider-container">
-            <input type="range" id="rateSlider" min="10" max="25" step="5" value="10" aria-label="Monthly commitment">
+            <input type="range" id="rateSlider" min="10" max="25" step="5" value="10" aria-label="Monthly order rate">
             <span class="slider-value"><span id="rateValue">10</span>/mo</span>
           </div>
         </div>
         <div>
           <label>Commitment Duration (years)</label>
           <div class="slider-container">
-            <input type="range" id="durationSlider" min="1" max="10" step="1" value="1" aria-label="Commitment duration">
-            <span class="slider-value"><span id="durationValue">1</span> yr</span>
+            <input type="range" id="durationSlider" min="1" max="10" step="1" value="4" aria-label="Commitment duration">
+            <span class="slider-value"><span id="durationValue">4</span> yr</span>
           </div>
         </div>
       </div>
       <div class="control-row">
         <div>
-          <label>Projection Period (years)</label>
-          <div class="slider-container">
-            <input type="range" id="projectionSlider" min="1" max="10" step="1" value="10" aria-label="Projection period">
-            <span class="slider-value"><span id="projectionValue">10</span> yr</span>
-          </div>
+          <label>Total Commitment: <span id="totalCommitment" style="color: #e84200; font-weight: 600;">480 units</span></label>
         </div>
         <div>
-          <label>Contract Length</label>
+          <label>Contract Length (per unit)</label>
           <div class="contract-buttons" id="contractButtons">
             <button class="contract-btn" data-years="1">1-Year</button>
             <button class="contract-btn" data-years="3">3-Year</button>
@@ -328,40 +324,32 @@
     </div>
 
     <div class="discount-highlight">
-      <div class="discount-title">Your Total Year 2+ Discount (at <span id="fleetSizeDisplay">360</span> units deployed)</div>
-      <div class="discount-amount" id="totalY2Discount">43%</div>
+      <div class="discount-title">Your Total Year 2+ Discount (<span id="totalUnitsDisplay">480</span> units committed)</div>
+      <div class="discount-amount" id="totalY2Discount">30%</div>
       <div class="discount-subtitle">
-        Y2+ Price: <span id="y2PriceDisplay">$850</span>/unit/year (base: $1,550)
+        Y2+ Price: <span id="y2PriceDisplay">$1,100</span>/unit/year (base: $1,550)
       </div>
       <div class="discount-breakdown">
         <div class="discount-item">
-          <div class="discount-label">Rate</div>
-          <div class="discount-value" id="rateDiscValue">0%</div>
-        </div>
-        <div class="discount-item">
-          <div class="discount-label">Duration</div>
-          <div class="discount-value" id="durationDiscValue">0%</div>
+          <div class="discount-label">Volume (Y2+)</div>
+          <div class="discount-value active" id="volumeDiscValue">25%</div>
         </div>
         <div class="discount-item">
           <div class="discount-label">Contract</div>
-          <div class="discount-value" id="contractDiscValue">10%</div>
-        </div>
-        <div class="discount-item">
-          <div class="discount-label">Fleet Size</div>
-          <div class="discount-value active" id="fleetDiscValue">16%</div>
+          <div class="discount-value" id="contractDiscValue">5%</div>
         </div>
       </div>
     </div>
 
     <div class="fleet-tiers-table">
-      <div class="table-title">Fleet Size Discount Tiers (Year 2+ only)</div>
-      <table id="fleetTiersTable">
+      <div class="table-title">Volume Commitment Discount Tiers</div>
+      <table id="volumeTiersTable">
         <thead>
           <tr>
-            <th>Fleet Size</th>
-            <th>Fleet Discount</th>
+            <th>Total Commitment</th>
+            <th>Volume Discount</th>
+            <th>Y1 Discount</th>
             <th>Example Y2+ Price</th>
-            <th>Savings vs Base</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -369,7 +357,7 @@
     </div>
 
     <div class="chart-container">
-      <div class="chart-title">Year 2+ Price by Fleet Size (with your commitment)</div>
+      <div class="chart-title">Total Contract Price by Commitment Level</div>
       <div class="chart-wrapper">
         <canvas id="priceChart"></canvas>
       </div>
@@ -377,14 +365,12 @@
 
     <div class="pitch-section">
       <h2>How Your Discounts Work</h2>
-      <p>Your pricing is based on four factors that combine to give you the best possible price:</p>
+      <p>Your pricing is based on two simple factors:</p>
       <ul>
-        <li><strong>Rate Commitment:</strong> Higher monthly orders unlock deeper discounts</li>
-        <li><strong>Duration Commitment:</strong> Longer purchasing commitments earn additional savings</li>
-        <li><strong>Contract Length:</strong> Multi-year contracts reduce per-unit pricing</li>
-        <li><strong>Fleet Size:</strong> As your deployed fleet grows, you unlock Year 2+ discounts</li>
+        <li><strong>Volume Commitment:</strong> Total units = monthly rate × 12 × years. Higher commitments unlock deeper discounts (Y1 gets 50% of volume discount, Y2+ gets full discount)</li>
+        <li><strong>Contract Length:</strong> Longer per-unit contracts (1/3/5/10 year) reduce pricing</li>
       </ul>
-      <p style="margin-top: 1rem;"><strong>The bigger your fleet, the more you save on ongoing support costs.</strong></p>
+      <p style="margin-top: 1rem;"><strong>The more you commit upfront, the more you save across the entire deal.</strong></p>
     </div>
 
     <div class="footer" id="footer"></div>
@@ -398,69 +384,60 @@
     function update() {
       const rate = parseInt(document.getElementById('rateSlider').value);
       const duration = parseInt(document.getElementById('durationSlider').value);
-      const projectionYears = parseInt(document.getElementById('projectionSlider').value);
 
-      // Fleet size grows based on order rate during commitment period
-      // Fleet stops growing once commitment ends
-      // fleetSize = rate × 12 × min(projection, commitment)
-      const fleetSize = rate * 12 * Math.min(projectionYears, duration);
+      // Total commitment = rate × 12 × duration
+      const totalUnits = PRICING.totalCommitment(rate, duration);
 
       document.getElementById('rateValue').textContent = rate;
       document.getElementById('durationValue').textContent = duration;
-      document.getElementById('projectionValue').textContent = projectionYears;
+      document.getElementById('totalCommitment').textContent = totalUnits + ' units';
 
       // Get discount breakdown
-      const discounts = PRICING.getDiscountBreakdown(rate, duration, selectedContract, fleetSize);
+      const discounts = PRICING.getDiscountBreakdown(rate, duration, selectedContract);
 
       // Display discount breakdown
-      document.getElementById('rateDiscValue').textContent = Math.round(discounts.rate * 100) + '%';
-      document.getElementById('durationDiscValue').textContent = Math.round(discounts.duration * 100) + '%';
+      document.getElementById('volumeDiscValue').textContent = Math.round(discounts.volume * 100) + '%';
       document.getElementById('contractDiscValue').textContent = Math.round(discounts.contract * 100) + '%';
-      document.getElementById('fleetDiscValue').textContent = Math.round(discounts.fleet * 100) + '%';
 
       // Highlight active discounts
-      document.getElementById('rateDiscValue').className = 'discount-value' + (discounts.rate > 0 ? ' active' : '');
-      document.getElementById('durationDiscValue').className = 'discount-value' + (discounts.duration > 0 ? ' active' : '');
+      document.getElementById('volumeDiscValue').className = 'discount-value' + (discounts.volume > 0 ? ' active' : '');
       document.getElementById('contractDiscValue').className = 'discount-value' + (discounts.contract > 0 ? ' active' : '');
-      document.getElementById('fleetDiscValue').className = 'discount-value' + (discounts.fleet > 0 ? ' active' : '');
 
       // Total Y2+ discount and price
       const totalY2Disc = discounts.totalY2;
-      const y2Price = PRICING.year2Price(rate, duration, selectedContract, fleetSize);
+      const y2Price = PRICING.year2Price(rate, duration, selectedContract);
       document.getElementById('totalY2Discount').textContent = Math.round(totalY2Disc * 100) + '%';
       document.getElementById('y2PriceDisplay').textContent = PRICING.formatCurrency(y2Price);
-      document.getElementById('fleetSizeDisplay').textContent = fleetSize;
+      document.getElementById('totalUnitsDisplay').textContent = totalUnits;
 
-      // Fleet tiers table
-      const fleetTbody = document.querySelector('#fleetTiersTable tbody');
-      fleetTbody.innerHTML = '';
+      // Volume tiers table
+      const volumeTbody = document.querySelector('#volumeTiersTable tbody');
+      volumeTbody.innerHTML = '';
 
       const tiers = [
-        { label: '1-49 units', min: 1, max: 49 },
-        { label: '50-99 units', min: 50, max: 99 },
-        { label: '100-249 units', min: 100, max: 249 },
-        { label: '250-499 units', min: 250, max: 499 },
+        { label: '0-119 units', min: 0, max: 119 },
+        { label: '120-239 units', min: 120, max: 239 },
+        { label: '240-359 units', min: 240, max: 359 },
+        { label: '360-499 units', min: 360, max: 499 },
         { label: '500+ units', min: 500, max: Infinity },
       ];
 
-      const baseY2 = CONFIG.prices.year2;
-
       tiers.forEach(tier => {
-        const fleetDisc = PRICING.year2FleetDiscount(tier.min);
-        const examplePrice = PRICING.year2Price(rate, duration, selectedContract, tier.min);
-        const savings = baseY2 - examplePrice;
-        const isCurrent = fleetSize >= tier.min && fleetSize <= tier.max;
+        const volumeDisc = PRICING.volumeDiscount(tier.min);
+        const y1VolumeDisc = volumeDisc * CONFIG.discounts.year1VolumeFactor;
+        const exampleY2Price = PRICING.roundUp50(CONFIG.prices.year2 * (1 - volumeDisc - discounts.contract));
+        const isCurrent = totalUnits >= tier.min && totalUnits <= tier.max;
 
         const row = document.createElement('tr');
         if (isCurrent) row.classList.add('current-tier');
 
         row.innerHTML = `
           <td>${isCurrent ? '<span class="tier-marker">-></span> ' : ''}${tier.label}</td>
-          <td>${Math.round(fleetDisc * 100)}%</td>
-          <td>${PRICING.formatCurrency(examplePrice)}/year</td>
-          <td>$${savings.toLocaleString()} off/unit/year</td>
+          <td>${Math.round(volumeDisc * 100)}%</td>
+          <td>${Math.round(y1VolumeDisc * 100)}%</td>
+          <td>${PRICING.formatCurrency(exampleY2Price)}/year</td>
         `;
-        fleetTbody.appendChild(row);
+        volumeTbody.appendChild(row);
       });
 
       // Pricing table
@@ -469,10 +446,10 @@
 
       CONTRACT_YEARS.forEach(contractYrs => {
         const y1 = PRICING.year1Price(rate, duration, contractYrs);
-        const y2 = PRICING.year2Price(rate, duration, contractYrs, fleetSize);
+        const y2 = PRICING.year2Price(rate, duration, contractYrs);
         const totalContract = y1 + (y2 * Math.max(0, contractYrs - 1));
         const y1Disc = PRICING.year1TotalDiscount(rate, duration, contractYrs);
-        const y2Disc = PRICING.year2TotalDiscount(rate, duration, contractYrs, fleetSize);
+        const y2Disc = PRICING.year2TotalDiscount(rate, duration, contractYrs);
 
         const row = document.createElement('tr');
         const isSelected = contractYrs === selectedContract;
@@ -499,16 +476,16 @@
       });
 
       // Update chart
-      updateChart(rate, duration, fleetSize);
+      updateChart(rate, duration, totalUnits);
 
       // Footer
-      const nextTier = PRICING.getNextFleetTier(fleetSize);
-      let footerText = `At ${rate}/mo for ${projectionYears} years = ${fleetSize} units deployed. `;
+      const nextTier = PRICING.getNextVolumeTier(totalUnits);
+      let footerText = `${rate}/mo × ${duration} years = ${totalUnits} units committed. `;
       if (nextTier) {
-        const monthsToNext = Math.ceil((nextTier.minUnits - fleetSize) / rate);
-        footerText += `${nextTier.minUnits - fleetSize} more units (${monthsToNext} months) unlocks ${Math.round(nextTier.discount * 100)}% fleet discount.`;
+        const unitsNeeded = nextTier.minUnits - totalUnits;
+        footerText += `${unitsNeeded} more units unlocks ${Math.round(nextTier.discount * 100)}% volume discount.`;
       } else {
-        footerText += 'Maximum fleet discount tier achieved!';
+        footerText += 'Maximum volume discount tier achieved!';
       }
       document.getElementById('footer').textContent = footerText;
     }
@@ -525,17 +502,16 @@
 
     document.getElementById('rateSlider').addEventListener('input', update);
     document.getElementById('durationSlider').addEventListener('input', update);
-    document.getElementById('projectionSlider').addEventListener('input', update);
 
-    // Initialize price chart
+    // Initialize price chart - shows total contract price by commitment level
     const ctx = document.getElementById('priceChart').getContext('2d');
     priceChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: ['25', '50', '100', '150', '200', '250', '300', '400', '500', '600'],
+        labels: ['120', '240', '360', '480', '500', '600'],
         datasets: [
           {
-            label: 'Year 2+ Price',
+            label: 'Total Contract Price',
             data: [],
             borderColor: '#e84200',
             backgroundColor: 'rgba(232, 66, 0, 0.1)',
@@ -560,18 +536,18 @@
             borderColor: '#3a3a3c',
             borderWidth: 1,
             callbacks: {
-              label: ctx => 'Y2+ Price: $' + ctx.raw.toLocaleString()
+              label: ctx => 'Total: $' + ctx.raw.toLocaleString()
             }
           }
         },
         scales: {
           x: {
-            title: { display: true, text: 'Fleet Size (units)', color: '#86868b' },
+            title: { display: true, text: 'Total Commitment (units)', color: '#86868b' },
             ticks: { color: '#86868b' },
             grid: { color: '#2c2c2e' }
           },
           y: {
-            title: { display: true, text: 'Year 2+ Price ($)', color: '#86868b' },
+            title: { display: true, text: 'Contract Price per Unit ($)', color: '#86868b' },
             ticks: { color: '#86868b', callback: v => '$' + v },
             grid: { color: '#2c2c2e' }
           }
@@ -579,21 +555,27 @@
       }
     });
 
-    function updateChart(rate, duration, currentFleet) {
-      if (!priceChart) return; // Chart not initialized yet
+    function updateChart(rate, duration, currentCommitment) {
+      if (!priceChart) return;
 
-      const fleetSizes = [25, 50, 100, 150, 200, 250, 300, 400, 500, 600];
-      const prices = fleetSizes.map(fleet => PRICING.year2Price(rate, duration, selectedContract, fleet));
+      // Show contract prices at different commitment levels
+      const commitmentLevels = [120, 240, 360, 480, 500, 600];
+      const prices = commitmentLevels.map(units => {
+        // Calculate rate and duration that would give this commitment
+        const tempRate = 10;
+        const tempDuration = units / (tempRate * 12);
+        return PRICING.contractPrice(tempRate, tempDuration, selectedContract);
+      });
 
       priceChart.data.datasets[0].data = prices;
 
-      // Highlight current fleet position
-      const currentIdx = fleetSizes.findIndex((f, i) => {
-        const next = fleetSizes[i + 1] || Infinity;
-        return currentFleet >= f && currentFleet < next;
+      // Highlight current commitment position
+      const currentIdx = commitmentLevels.findIndex((c, i) => {
+        const next = commitmentLevels[i + 1] || Infinity;
+        return currentCommitment >= c && currentCommitment < next;
       });
-      priceChart.data.datasets[0].pointRadius = fleetSizes.map((f, i) => {
-        if (i === currentIdx || (currentIdx === -1 && f >= currentFleet)) return 8;
+      priceChart.data.datasets[0].pointRadius = commitmentLevels.map((c, i) => {
+        if (i === currentIdx || (currentIdx === -1 && c >= currentCommitment)) return 8;
         return 4;
       });
 
