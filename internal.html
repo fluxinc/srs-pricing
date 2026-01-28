@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flux Box Pricing - Internal</title>
+  <script src="config.js"></script>
+  <script src="pricing.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0d0d0d;
+      color: #f5f5f7;
+      line-height: 1.5;
+      padding: 2rem;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    h1 { font-size: 2rem; font-weight: 600; margin-bottom: 0.5rem; }
+    h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; color: #86868b; }
+
+    .subtitle { color: #86868b; margin-bottom: 2rem; }
+
+    .internal-badge {
+      display: inline-block;
+      background: #ff453a;
+      color: white;
+      padding: 0.25rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 1rem;
+      vertical-align: middle;
+    }
+
+    .controls {
+      background: #1c1c1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #2c2c2e;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+
+    .slider-container { display: flex; align-items: center; gap: 1rem; }
+
+    input[type="range"] {
+      flex: 1;
+      height: 8px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #3a3a3c;
+      border-radius: 4px;
+      outline: none;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      background: #0a84ff;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .slider-value { font-size: 1.25rem; font-weight: 600; min-width: 100px; text-align: right; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+
+    .panel {
+      background: #1c1c1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid #2c2c2e;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: #1c1c1e;
+      border-radius: 12px;
+      padding: 1rem;
+      border: 1px solid #2c2c2e;
+    }
+
+    .card-label { font-size: 0.75rem; color: #86868b; margin-bottom: 0.25rem; }
+    .card-value { font-size: 1.25rem; font-weight: 600; }
+    .card-value.good { color: #30d158; }
+    .card-value.warning { color: #ff9f0a; }
+    .card-value.bad { color: #ff453a; }
+
+    .cost-breakdown { margin-top: 1rem; }
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #2c2c2e;
+    }
+    .cost-row:last-child { border-bottom: none; }
+    .cost-row.total { font-weight: 600; border-top: 2px solid #3a3a3c; margin-top: 0.5rem; padding-top: 1rem; }
+
+    .table-container {
+      background: #1c1c1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid #2c2c2e;
+      overflow-x: auto;
+      margin-bottom: 1.5rem;
+    }
+
+    .table-title { font-weight: 600; margin-bottom: 1rem; }
+
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.5rem 0.75rem; text-align: right; border-bottom: 1px solid #2c2c2e; font-size: 0.875rem; }
+    th { font-weight: 600; color: #86868b; }
+    th:first-child, td:first-child { text-align: left; }
+    tr:last-child td { border-bottom: none; }
+    .highlight { background: #1a3a1a; }
+
+    .good { color: #30d158; }
+    .warning { color: #ff9f0a; }
+    .bad { color: #ff453a; }
+
+    .footer { margin-top: 2rem; text-align: center; color: #86868b; font-size: 0.875rem; }
+
+    code { background: #2c2c2e; padding: 0.2rem 0.4rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Flux Box Pricing <span class="internal-badge">INTERNAL</span></h1>
+    <p class="subtitle">Cost breakdown, margins, and profitability analysis</p>
+
+    <div class="controls">
+      <div class="control-row">
+        <div>
+          <label>Monthly Commitment</label>
+          <div class="slider-container">
+            <input type="range" id="rateSlider" min="10" max="25" step="5" value="10" aria-label="Monthly commitment">
+            <span class="slider-value"><span id="rateValue">10</span>/mo</span>
+          </div>
+        </div>
+        <div>
+          <label>Commitment Duration</label>
+          <div class="slider-container">
+            <input type="range" id="durationSlider" min="1" max="10" step="1" value="1" aria-label="Commitment duration">
+            <span class="slider-value"><span id="durationValue">1</span> yr</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Year 1 Price</div>
+        <div class="card-value" id="y1Price">$3,500</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Year 1 Cost</div>
+        <div class="card-value" id="y1Cost">$1,670</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Year 1 Margin</div>
+        <div class="card-value good" id="y1Margin">52%</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Year 2+ Price</div>
+        <div class="card-value" id="y2Price">$1,250</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Y2+ Cost (per-unit)</div>
+        <div class="card-value" id="y2Cost">$670</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Y2+ Margin (per-unit)</div>
+        <div class="card-value good" id="y2Margin">46%</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Overhead/Unit</div>
+        <div class="card-value" id="overheadPerUnit">$500</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Y2+ Cost (w/ overhead)</div>
+        <div class="card-value" id="y2CostEffective">$1,170</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Y2+ Margin (effective)</div>
+        <div class="card-value good" id="y2MarginEffective">46%</div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Year 1 Cost Breakdown</h2>
+        <div class="cost-breakdown" id="y1Breakdown"></div>
+      </div>
+      <div class="panel">
+        <h2>Year 2+ Cost Breakdown</h2>
+        <div class="cost-breakdown" id="y2Breakdown"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Discount Breakdown</h2>
+        <div class="cost-breakdown" id="discountBreakdown"></div>
+      </div>
+      <div class="panel">
+        <h2>Config Summary</h2>
+        <div class="cost-breakdown" id="configSummary"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Monthly Financial Impact</h2>
+        <div class="cost-breakdown" id="monthlyFinancials"></div>
+      </div>
+      <div class="panel">
+        <h2>Annual Labor Budget</h2>
+        <div class="cost-breakdown" id="laborBudget"></div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Margin by Commitment Level</div>
+      <table id="marginTable">
+        <thead>
+          <tr>
+            <th>Commitment</th>
+            <th>Total Discount</th>
+            <th>Y1 Price</th>
+            <th>Y1 Margin</th>
+            <th>Y2+ Price</th>
+            <th>Y2+ Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      Edit <code>config.js</code> to adjust costs, prices, and discount settings.
+    </div>
+  </div>
+
+  <script>
+    function marginClass(margin) {
+      if (margin >= 0.40) return 'good';
+      if (margin >= 0.30) return 'warning';
+      return 'bad';
+    }
+
+    function update() {
+      const rate = parseInt(document.getElementById('rateSlider').value);
+      const duration = parseInt(document.getElementById('durationSlider').value);
+
+      document.getElementById('rateValue').textContent = rate;
+      document.getElementById('durationValue').textContent = duration;
+
+      // Prices and margins
+      const y1Price = PRICING.year1Price(rate, duration);
+      const y1Cost = PRICING.year1Cost();
+      const y1Margin = PRICING.year1Margin(rate, duration);
+
+      const y2Price = PRICING.year2Price(rate, duration);
+      const y2Cost = PRICING.year2Cost();
+      const y2Margin = PRICING.year2Margin(rate, duration);
+
+      document.getElementById('y1Price').textContent = PRICING.formatCurrency(y1Price);
+      document.getElementById('y1Cost').textContent = '$' + Math.round(y1Cost).toLocaleString();
+      document.getElementById('y1Margin').textContent = PRICING.formatPercent(y1Margin);
+      document.getElementById('y1Margin').className = 'card-value ' + marginClass(y1Margin);
+
+      document.getElementById('y2Price').textContent = PRICING.formatCurrency(y2Price);
+      document.getElementById('y2Cost').textContent = '$' + Math.round(y2Cost).toLocaleString();
+      document.getElementById('y2Margin').textContent = PRICING.formatPercent(y2Margin);
+      document.getElementById('y2Margin').className = 'card-value ' + marginClass(y2Margin);
+
+      // Effective margins with overhead (based on Year 1 install base)
+      const installBase = rate * 12;
+      const overheadPerUnit = PRICING.overheadPerUnit(installBase);
+      const y2CostEffective = y2Cost + overheadPerUnit;
+      const y2MarginEffective = PRICING.year2MarginWithOverhead(rate, duration, undefined, installBase);
+
+      document.getElementById('overheadPerUnit').textContent = '$' + Math.round(overheadPerUnit).toLocaleString();
+      document.getElementById('y2CostEffective').textContent = '$' + Math.round(y2CostEffective).toLocaleString();
+      document.getElementById('y2MarginEffective').textContent = PRICING.formatPercent(y2MarginEffective);
+      document.getElementById('y2MarginEffective').className = 'card-value ' + marginClass(y2MarginEffective);
+
+      // Cost breakdowns
+      const C = CONFIG;
+      const coordCost = C.labor.coordinationHoursPerUnitYear * C.labor.hourlyRate;
+      document.getElementById('y1Breakdown').innerHTML = `
+        <div class="cost-row"><span>Hardware</span><span>$${C.hardware.fluxBox}</span></div>
+        <div class="cost-row"><span>Build Labor (${C.labor.buildHoursPerUnit}hrs × $${C.labor.hourlyRate})</span><span>$${C.labor.buildHoursPerUnit * C.labor.hourlyRate}</span></div>
+        <div class="cost-row"><span>Support (${C.labor.supportHoursPerUnitYear}hrs × $${C.labor.hourlyRate})</span><span>$${C.labor.supportHoursPerUnitYear * C.labor.hourlyRate}</span></div>
+        <div class="cost-row"><span>Coordination (${C.labor.coordinationHoursPerUnitYear}hrs × $${C.labor.hourlyRate})</span><span>$${coordCost}</span></div>
+        <div class="cost-row total"><span>Total Cost</span><span>$${Math.round(y1Cost)}</span></div>
+      `;
+
+      document.getElementById('y2Breakdown').innerHTML = `
+        <div class="cost-row"><span>Support (${C.labor.supportHoursPerUnitYear}hrs × $${C.labor.hourlyRate})</span><span>$${C.labor.supportHoursPerUnitYear * C.labor.hourlyRate}</span></div>
+        <div class="cost-row"><span>Hardware Reserve ($${C.hardware.fluxBox} / ${C.hardware.replacementCycleYears}yr)</span><span>$${Math.round(PRICING.hardwareReserve)}</span></div>
+        <div class="cost-row total"><span>Total Cost</span><span>$${Math.round(y2Cost)}</span></div>
+      `;
+
+      // Discount breakdown
+      const rateDisc = PRICING.rateDiscount(rate);
+      const durationDisc = PRICING.durationDiscount(duration);
+      const totalDisc = PRICING.totalDiscount(rate, duration);
+
+      document.getElementById('discountBreakdown').innerHTML = `
+        <div class="cost-row"><span>Rate Discount (${rate}/mo)</span><span>${PRICING.formatPercent(rateDisc)}</span></div>
+        <div class="cost-row"><span>Duration Discount (${duration}yr)</span><span>${PRICING.formatPercent(durationDisc)}</span></div>
+        <div class="cost-row total"><span>Total Discount</span><span>${PRICING.formatPercent(totalDisc)}</span></div>
+        <div class="cost-row"><span>Y1 Discount (${C.discounts.year1DiscountFactor * 100}% factor)</span><span>${PRICING.formatPercent(totalDisc * C.discounts.year1DiscountFactor)}</span></div>
+      `;
+
+      // Config summary
+      const minRateDisc = PRICING.rateDiscount(10);
+      const minDurDisc = PRICING.durationDiscount(1);
+      document.getElementById('configSummary').innerHTML = `
+        <div class="cost-row"><span>Base Y1 Price (no commit)</span><span>$${PRICING.year1Base.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Base Y2+ Price (no commit)</span><span>$${C.prices.year2.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Base 5yr Total (no commit)</span><span>$${PRICING.baseline5yr.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Discount @ 10/mo min</span><span>${PRICING.formatPercent(minRateDisc)}</span></div>
+        <div class="cost-row"><span>Discount @ 1yr min</span><span>${PRICING.formatPercent(minDurDisc)}</span></div>
+        <div class="cost-row total"><span>Max Commitment Discount</span><span>${(C.discounts.maxRateDiscount + C.discounts.maxDurationDiscount) * 100}%</span></div>
+      `;
+
+      // Monthly financials (customer spend & our revenue)
+      const monthlyY1Revenue = rate * y1Price;
+      const monthlyY1Cost = rate * y1Cost;
+      const monthlyY1Profit = monthlyY1Revenue - monthlyY1Cost;
+      const annualNewUnits = rate * 12;
+
+      // Break out hardware vs labor
+      const monthlyHardwareCost = rate * C.hardware.fluxBox;
+      const laborHoursPerUnit = C.labor.buildHoursPerUnit + C.labor.supportHoursPerUnitYear + C.labor.coordinationHoursPerUnitYear;
+      const monthlyLaborCost = rate * laborHoursPerUnit * C.labor.hourlyRate;
+
+      document.getElementById('monthlyFinancials').innerHTML = `
+        <div class="cost-row"><span>New Units/Month</span><span>${rate}</span></div>
+        <div class="cost-row"><span>Monthly Y1 Revenue</span><span>$${monthlyY1Revenue.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Hardware Cost</span><span>$${Math.round(monthlyHardwareCost).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Labor Cost</span><span>$${Math.round(monthlyLaborCost).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Y1 Cost (total)</span><span>$${Math.round(monthlyY1Cost).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Monthly Y1 Profit</span><span class="${marginClass(monthlyY1Profit/monthlyY1Revenue)}">$${Math.round(monthlyY1Profit).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Annual New Units</span><span>${annualNewUnits}</span></div>
+        <div class="cost-row"><span>Annual Y1 Revenue</span><span>$${(monthlyY1Revenue * 12).toLocaleString()}</span></div>
+      `;
+
+      // Labor budget analysis
+      const installBaseYear1 = annualNewUnits;
+      const supportHoursNeeded = installBaseYear1 * C.labor.supportHoursPerUnitYear;
+      const supportFTEs = supportHoursNeeded / C.labor.fteHoursPerYear;
+      const overheadFTEs = C.overhead.devMaintenanceFTEs;
+      const totalFTEs = supportFTEs + overheadFTEs;
+      const totalLaborCost = (Math.ceil(totalFTEs) * C.labor.fteSalary) + C.overhead.additionalAnnualCost;
+
+      // Available labor budget = revenue minus hardware costs
+      const annualY2Revenue = installBaseYear1 * y2Price;
+      const annualHardwareReserve = installBaseYear1 * PRICING.hardwareReserve;
+      const availableForLabor = annualY2Revenue - annualHardwareReserve;
+      const laborUtilization = totalLaborCost / availableForLabor;
+
+      document.getElementById('laborBudget').innerHTML = `
+        <div class="cost-row"><span>Install Base (Year 1)</span><span>${installBaseYear1} units</span></div>
+        <div class="cost-row"><span>Support Hours (Y2+)</span><span>${supportHoursNeeded.toLocaleString()} hrs/yr</span></div>
+        <div class="cost-row"><span>Support FTEs</span><span>${supportFTEs.toFixed(2)}</span></div>
+        <div class="cost-row"><span>Dev/Maintenance FTEs</span><span>${overheadFTEs.toFixed(2)}</span></div>
+        <div class="cost-row"><span>Total FTEs Needed</span><span>${totalFTEs.toFixed(2)}</span></div>
+        <div class="cost-row"><span>Total Labor Cost</span><span>$${totalLaborCost.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Y2+ Revenue</span><span>$${annualY2Revenue.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Hardware Reserve</span><span>-$${Math.round(annualHardwareReserve).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Available for Labor</span><span>$${Math.round(availableForLabor).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Labor Utilization</span><span class="${laborUtilization > 1 ? 'bad' : laborUtilization > 0.8 ? 'warning' : 'good'}">${Math.round(laborUtilization * 100)}%</span></div>
+      `;
+
+      // Margin table
+      const marginTbody = document.querySelector('#marginTable tbody');
+      marginTbody.innerHTML = '';
+
+      const combos = [
+        { rate: 10, duration: 1, label: '10/mo, 1yr (min commit)' },
+        { rate: 10, duration: 3, label: '10/mo, 3yr' },
+        { rate: 10, duration: 5, label: '10/mo, 5yr' },
+        { rate: 10, duration: 10, label: '10/mo, 10yr' },
+        { rate: 15, duration: 5, label: '15/mo, 5yr' },
+        { rate: 20, duration: 5, label: '20/mo, 5yr' },
+        { rate: 25, duration: 5, label: '25/mo, 5yr' },
+        { rate: 25, duration: 10, label: '25/mo, 10yr (max commit)' },
+      ];
+
+      combos.forEach(c => {
+        const isSelected = c.rate === rate && c.duration === duration;
+        const disc = PRICING.totalDiscount(c.rate, c.duration);
+        const y1p = PRICING.year1Price(c.rate, c.duration);
+        const y1m = PRICING.year1Margin(c.rate, c.duration);
+        const y2p = PRICING.year2Price(c.rate, c.duration);
+        const y2m = PRICING.year2Margin(c.rate, c.duration);
+
+        const row = document.createElement('tr');
+        if (isSelected) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td>${c.label}</td>
+          <td>${PRICING.formatPercent(disc)}</td>
+          <td>${PRICING.formatCurrency(y1p)}</td>
+          <td class="${marginClass(y1m)}">${PRICING.formatPercent(y1m)}</td>
+          <td>${PRICING.formatCurrency(y2p)}</td>
+          <td class="${marginClass(y2m)}">${PRICING.formatPercent(y2m)}</td>
+        `;
+        marginTbody.appendChild(row);
+      });
+    }
+
+    document.getElementById('rateSlider').addEventListener('input', update);
+    document.getElementById('durationSlider').addEventListener('input', update);
+    update();
+  </script>
+</body>
+</html>
