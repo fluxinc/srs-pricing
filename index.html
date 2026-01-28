@@ -393,6 +393,7 @@
   <script>
     const CONTRACT_YEARS = [1, 3, 5, 10];
     let selectedContract = 5;
+    let priceChart = null;
 
     function update() {
       const rate = parseInt(document.getElementById('rateSlider').value);
@@ -528,7 +529,7 @@
 
     // Initialize price chart
     const ctx = document.getElementById('priceChart').getContext('2d');
-    const priceChart = new Chart(ctx, {
+    priceChart = new Chart(ctx, {
       type: 'line',
       data: {
         labels: ['25', '50', '100', '150', '200', '250', '300', '400', '500', '600'],
@@ -579,6 +580,8 @@
     });
 
     function updateChart(rate, duration, currentFleet) {
+      if (!priceChart) return; // Chart not initialized yet
+
       const fleetSizes = [25, 50, 100, 150, 200, 250, 300, 400, 500, 600];
       const prices = fleetSizes.map(fleet => PRICING.year2Price(rate, duration, selectedContract, fleet));
 
@@ -597,6 +600,7 @@
       priceChart.update();
     }
 
+    // Initialize
     update();
   </script>
 </body>
