@@ -301,6 +301,41 @@
     </div>
 
     <div class="table-container">
+      <div class="table-title">Part Number Pricing Sheet (at current commitment level)</div>
+      <table id="partNumberTable">
+        <thead>
+          <tr>
+            <th>Part Number</th>
+            <th>Description</th>
+            <th>Year 1</th>
+            <th>Year 2+/yr</th>
+            <th>Total Contract</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Commitment Timing Comparison (same total units, different timelines)</div>
+      <table id="timingComparisonTable">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Total Units</th>
+            <th>Volume Disc</th>
+            <th>Y1 Price</th>
+            <th>Y2+ Price</th>
+            <th>Contract Total (5yr)</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="table-container">
       <div class="table-title">Volume Tier Margin Analysis</div>
       <table id="volumeMarginTable">
         <thead>
@@ -545,6 +580,79 @@
         <div class="cost-row"><span>Annual Profit</span><span>$${Math.ceil(annualProfit).toLocaleString()}/yr</span></div>
         <div class="cost-row"><span>Profit per Unit</span><span>$${Math.ceil(profitPerUnit).toLocaleString()}/unit</span></div>
       `;
+
+      // Part number pricing sheet
+      const partNumberTbody = document.querySelector('#partNumberTable tbody');
+      partNumberTbody.innerHTML = '';
+
+      const partNumbers = [
+        { partNum: 'FX-SRS-1YR', desc: '1-Year Contract', years: 1 },
+        { partNum: 'FX-SRS-3YR', desc: '3-Year Contract', years: 3 },
+        { partNum: 'FX-SRS-5YR', desc: '5-Year Contract', years: 5 },
+        { partNum: 'FX-SRS-10YR', desc: '10-Year Contract', years: 10 },
+      ];
+
+      partNumbers.forEach(pn => {
+        const y1 = PRICING.year1Price(rate, duration, pn.years);
+        const y2 = pn.years > 1 ? PRICING.year2Price(rate, duration, pn.years) : 0;
+        const total = PRICING.contractPrice(rate, duration, pn.years);
+        const margin = PRICING.contractMargin(rate, duration, pn.years);
+
+        const row = document.createElement('tr');
+        if (pn.years === contractYrs) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td><code>${pn.partNum}</code></td>
+          <td>${pn.desc}</td>
+          <td>${PRICING.formatCurrency(y1)}</td>
+          <td>${pn.years > 1 ? PRICING.formatCurrency(y2) : '-'}</td>
+          <td><strong>${PRICING.formatCurrency(total)}</strong></td>
+          <td class="${marginClass(margin)}">${PRICING.formatPercent(margin)}</td>
+        `;
+        partNumberTbody.appendChild(row);
+      });
+
+      // Timing comparison (240 units example)
+      const timingTbody = document.querySelector('#timingComparisonTable tbody');
+      timingTbody.innerHTML = '';
+
+      const timingScenarios = [
+        { label: '20/mo × 1yr', rate: 20, duration: 1 },
+        { label: '10/mo × 2yr', rate: 10, duration: 2 },
+        { label: '10/mo × 4yr', rate: 10, duration: 4 },
+        { label: '20/mo × 2yr', rate: 20, duration: 2 },
+      ];
+
+      timingScenarios.forEach(s => {
+        const units = PRICING.totalCommitment(s.rate, s.duration);
+        const volumeDisc = PRICING.volumeDiscount(units);
+        const y1 = PRICING.year1Price(s.rate, s.duration, 5); // 5-year contract
+        const y2 = PRICING.year2Price(s.rate, s.duration, 5);
+        const total = PRICING.contractPrice(s.rate, s.duration, 5);
+
+        // Calculate note about current scenario
+        const isCurrent = s.rate === rate && s.duration === duration;
+        let note = '';
+        if (units === 240) {
+          note = 'Same total (240)';
+        } else {
+          note = `${units} units`;
+        }
+
+        const row = document.createElement('tr');
+        if (isCurrent) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td>${isCurrent ? '-> ' : ''}${s.label}</td>
+          <td>${units}</td>
+          <td>${PRICING.formatPercent(volumeDisc)}</td>
+          <td>${PRICING.formatCurrency(y1)}</td>
+          <td>${PRICING.formatCurrency(y2)}</td>
+          <td><strong>${PRICING.formatCurrency(total)}</strong></td>
+          <td style="color: #86868b; font-size: 0.8rem;">${note}</td>
+        `;
+        timingTbody.appendChild(row);
+      });
 
       // Volume margin table
       const volumeTbody = document.querySelector('#volumeMarginTable tbody');
