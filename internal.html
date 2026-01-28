@@ -335,12 +335,12 @@
       const y2Margin = PRICING.year2Margin(rate, duration, contractYrs);
 
       document.getElementById('y1Price').textContent = PRICING.formatCurrency(y1Price);
-      document.getElementById('y1Cost').textContent = '$' + Math.ceil(\1).toLocaleString();
+      document.getElementById('y1Cost').textContent = '$' + Math.ceil(y1Cost).toLocaleString();
       document.getElementById('y1Margin').textContent = PRICING.formatPercent(y1Margin);
       document.getElementById('y1Margin').className = 'card-value ' + marginClass(y1Margin);
 
       document.getElementById('y2Price').textContent = PRICING.formatCurrency(y2Price);
-      document.getElementById('y2Cost').textContent = '$' + Math.ceil(\1).toLocaleString();
+      document.getElementById('y2Cost').textContent = '$' + Math.ceil(y2Cost).toLocaleString();
       document.getElementById('y2Margin').textContent = PRICING.formatPercent(y2Margin);
       document.getElementById('y2Margin').className = 'card-value ' + marginClass(y2Margin);
 
@@ -350,8 +350,8 @@
       const y2CostEffective = y2Cost + overheadPerUnit;
       const y2MarginEffective = PRICING.year2MarginWithOverhead(rate, duration, contractYrs, installBase);
 
-      document.getElementById('overheadPerUnit').textContent = '$' + Math.ceil(\1).toLocaleString();
-      document.getElementById('y2CostEffective').textContent = '$' + Math.ceil(\1).toLocaleString();
+      document.getElementById('overheadPerUnit').textContent = '$' + Math.ceil(overheadPerUnit).toLocaleString();
+      document.getElementById('y2CostEffective').textContent = '$' + Math.ceil(y2CostEffective).toLocaleString();
       document.getElementById('y2MarginEffective').textContent = PRICING.formatPercent(y2MarginEffective);
       document.getElementById('y2MarginEffective').className = 'card-value ' + marginClass(y2MarginEffective);
 
@@ -363,13 +363,13 @@
         <div class="cost-row"><span>Build Labor (${C.labor.buildHoursPerUnit}hrs × $${C.labor.hourlyRate})</span><span>$${C.labor.buildHoursPerUnit * C.labor.hourlyRate}</span></div>
         <div class="cost-row"><span>Support (${C.labor.supportHoursPerUnitYear}hrs × $${C.labor.hourlyRate})</span><span>$${C.labor.supportHoursPerUnitYear * C.labor.hourlyRate}</span></div>
         <div class="cost-row"><span>Coordination (${C.labor.coordinationHoursPerUnitYear}hrs × $${C.labor.hourlyRate})</span><span>$${coordCost}</span></div>
-        <div class="cost-row total"><span>Total Cost</span><span>\${Math.ceil(\1)}</span></div>
+        <div class="cost-row total"><span>Total Cost</span><span>$${Math.ceil(y1Cost)}</span></div>
       `;
 
       document.getElementById('y2Breakdown').innerHTML = `
         <div class="cost-row"><span>Support (${C.labor.supportHoursPerUnitYear}hrs × $${C.labor.hourlyRate})</span><span>$${C.labor.supportHoursPerUnitYear * C.labor.hourlyRate}</span></div>
-        <div class="cost-row"><span>Hardware Reserve ($${C.hardware.fluxBox} / ${C.hardware.replacementCycleYears}yr)</span><span>\${Math.ceil(\1)}</span></div>
-        <div class="cost-row total"><span>Total Cost</span><span>\${Math.ceil(\1)}</span></div>
+        <div class="cost-row"><span>Hardware Reserve ($${C.hardware.fluxBox} / ${C.hardware.replacementCycleYears}yr)</span><span>$${Math.ceil(PRICING.hardwareReserve)}</span></div>
+        <div class="cost-row total"><span>Total Cost</span><span>$${Math.ceil(y2Cost)}</span></div>
       `;
 
       // Discount breakdown
@@ -410,10 +410,10 @@
       document.getElementById('monthlyFinancials').innerHTML = `
         <div class="cost-row"><span>New Units/Month</span><span>${rate}</span></div>
         <div class="cost-row"><span>Monthly Y1 Revenue</span><span>$${monthlyY1Revenue.toLocaleString()}</span></div>
-        <div class="cost-row"><span>Monthly Hardware Cost</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row"><span>Monthly Labor Cost</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row"><span>Monthly Y1 Cost (total)</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row total"><span>Monthly Y1 Profit</span><span class="${marginClass(monthlyY1Profit/monthlyY1Revenue)}">$${Math.ceil(\1).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Hardware Cost</span><span>$${Math.ceil(monthlyHardwareCost).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Labor Cost</span><span>$${Math.ceil(monthlyLaborCost).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Y1 Cost (total)</span><span>$${Math.ceil(monthlyY1Cost).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Monthly Y1 Profit</span><span class="${marginClass(monthlyY1Profit/monthlyY1Revenue)}">$${Math.ceil(monthlyY1Profit).toLocaleString()}</span></div>
         <div class="cost-row"><span>Annual New Units</span><span>${annualNewUnits}</span></div>
         <div class="cost-row"><span>Annual Y1 Revenue</span><span>$${(monthlyY1Revenue * 12).toLocaleString()}</span></div>
       `;
@@ -440,8 +440,8 @@
         <div class="cost-row"><span>Total FTEs Needed</span><span>${totalFTEs.toFixed(2)}</span></div>
         <div class="cost-row"><span>Total Labor Cost</span><span>$${totalLaborCost.toLocaleString()}</span></div>
         <div class="cost-row"><span>Y2+ Revenue</span><span>$${annualY2Revenue.toLocaleString()}</span></div>
-        <div class="cost-row"><span>Hardware Reserve</span><span>-$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row total"><span>Available for Labor</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Hardware Reserve</span><span>-$${Math.ceil(annualHardwareReserve).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Available for Labor</span><span>$${Math.ceil(availableForLabor).toLocaleString()}</span></div>
         <div class="cost-row total"><span>Labor Utilization</span><span class="${laborUtilization > 1 ? 'bad' : laborUtilization > 0.8 ? 'warning' : 'good'}">${Math.round(laborUtilization * 100)}%</span></div>
       `;
 
@@ -456,7 +456,7 @@
         <div class="cost-row"><span>Contract Length</span><span>${contractYrs} years/unit</span></div>
         <div class="cost-row total"><span>Total Units Deployed</span><span>${totalUnits.toLocaleString()}</span></div>
         <div class="cost-row"><span>Price per Unit (${contractYrs}yr)</span><span>$${contractTotal.toLocaleString()}</span></div>
-        <div class="cost-row"><span>Cost per Unit (${contractYrs}yr)</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Cost per Unit (${contractYrs}yr)</span><span>$${Math.ceil(unitCost).toLocaleString()}</span></div>
       `;
 
       // Profitability analysis over full commitment
@@ -470,14 +470,14 @@
       const profitPerUnit = netProfit / totalUnits;
 
       document.getElementById('profitabilityAnalysis').innerHTML = `
-        <div class="cost-row"><span>Total Revenue</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row"><span>Total Unit Costs</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row"><span>Total Overhead (${duration}yr)</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row"><span>Total Costs</span><span>$${Math.ceil(\1).toLocaleString()}</span></div>
-        <div class="cost-row total"><span>Net Profit</span><span class="${marginClass(profitMargin)}">$${Math.ceil(\1).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Revenue</span><span>$${Math.ceil(totalRevenue).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Unit Costs</span><span>$${Math.ceil(totalUnitCosts).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Overhead (${duration}yr)</span><span>$${Math.ceil(totalOverhead).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Costs</span><span>$${Math.ceil(totalCosts).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Net Profit</span><span class="${marginClass(profitMargin)}">$${Math.ceil(netProfit).toLocaleString()}</span></div>
         <div class="cost-row total"><span>Profit Margin</span><span class="${marginClass(profitMargin)}">${Math.round(profitMargin * 100)}%</span></div>
-        <div class="cost-row"><span>Annual Profit</span><span>$${Math.ceil(\1).toLocaleString()}/yr</span></div>
-        <div class="cost-row"><span>Profit per Unit</span><span>$${Math.ceil(\1).toLocaleString()}/unit</span></div>
+        <div class="cost-row"><span>Annual Profit</span><span>$${Math.ceil(annualProfit).toLocaleString()}/yr</span></div>
+        <div class="cost-row"><span>Profit per Unit</span><span>$${Math.ceil(profitPerUnit).toLocaleString()}/unit</span></div>
       `;
 
       // Margin table
