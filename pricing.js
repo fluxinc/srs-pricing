@@ -73,11 +73,18 @@ const PRICING = {
   },
 
   /**
+   * Commitment discount (rate + duration only, applies to Y1 and Y2+)
+   */
+  commitmentDiscount(monthlyRate, commitYears) {
+    return this.rateDiscount(monthlyRate) + this.durationDiscount(commitYears);
+  },
+
+  /**
    * Total discount (rate + duration + contract)
+   * Contract discount only applies to Year 1
    */
   totalDiscount(monthlyRate, commitYears, contractYears) {
-    return this.rateDiscount(monthlyRate) +
-           this.durationDiscount(commitYears) +
+    return this.commitmentDiscount(monthlyRate, commitYears) +
            this.contractDiscount(contractYears);
   },
 
@@ -96,10 +103,12 @@ const PRICING = {
 
   /**
    * Year 2+ price per unit per year
+   * Contract discount applies but reduced by 5 points
    */
   year2Price(monthlyRate, commitYears, contractYears) {
     const basePrice = CONFIG.prices.year2;
-    const discount = this.totalDiscount(monthlyRate, commitYears, contractYears);
+    const contractDisc = Math.max(0, this.contractDiscount(contractYears) - 0.05);
+    const discount = this.commitmentDiscount(monthlyRate, commitYears) + contractDisc;
     return this.roundUp50(basePrice * (1 - discount));
   },
 

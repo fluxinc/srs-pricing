@@ -18,10 +18,10 @@ const CONFIG = {
   // LABOR COSTS
   // ============================================================
   labor: {
-    hourlyRate: 45,                   // Billing rate per hour
+    hourlyRate: 35,                   // Billing rate per hour
     fteSalary: 60000,                 // Annual FTE salary
     fteHoursPerYear: 2000,            // Work hours per FTE (50 weeks × 40 hrs)
-    buildHoursPerUnit: 4,             // One-time setup per unit
+    buildHoursPerUnit: 3,             // One-time setup per unit
     supportHoursPerUnitYear: 8,       // Annual support per unit
     coordinationHoursPerUnitYear: 4,  // Annual coordination overhead per unit
   },
@@ -51,12 +51,12 @@ const CONFIG = {
     // Baseline is 0 (no commitment) - slider starts at 10, which already earns ~13% discount
     minRate: 0,                       // Baseline: no commitment (conceptual)
     maxRate: 25,                      // Maximum for full rate discount
-    maxRateDiscount: 0.15,            // 20% max from higher rate
+    maxRateDiscount: 0.25,            // 20% max from higher rate
 
     // Duration commitment discount (years of commitment to purchase)
     // Baseline is 0 (no commitment) - slider starts at 1yr, which earns ~3% discount
     minDuration: 0,                   // Baseline: no commitment (conceptual)
-    maxDuration: 5,                  // Maximum for full duration discount
+    maxDuration: 10,                  // Maximum for full duration discount
     maxDurationDiscount: 0.15,        // 15% max from longer commitment
 
     // Contract length discount (per-unit contract term)

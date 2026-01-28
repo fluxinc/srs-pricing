@@ -140,6 +140,24 @@
     .footer { margin-top: 2rem; text-align: center; color: #86868b; font-size: 0.875rem; }
 
     code { background: #2c2c2e; padding: 0.2rem 0.4rem; border-radius: 4px; }
+
+    .contract-buttons { display: flex; gap: 0.5rem; }
+    .contract-btn {
+      background: #2c2c2e;
+      border: 1px solid #3a3a3c;
+      color: #f5f5f7;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    .contract-btn:hover { background: #3a3a3c; }
+    .contract-btn.active {
+      background: #0a84ff;
+      border-color: #0a84ff;
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -161,6 +179,17 @@
           <div class="slider-container">
             <input type="range" id="durationSlider" min="1" max="10" step="1" value="1" aria-label="Commitment duration">
             <span class="slider-value"><span id="durationValue">1</span> yr</span>
+          </div>
+        </div>
+      </div>
+      <div class="control-row" style="margin-top: 1rem;">
+        <div>
+          <label>Contract Package</label>
+          <div class="contract-buttons" id="contractButtons">
+            <button class="contract-btn" data-years="1">1-Year</button>
+            <button class="contract-btn" data-years="3">3-Year</button>
+            <button class="contract-btn" data-years="5">5-Year</button>
+            <button class="contract-btn active" data-years="10">10-Year</button>
           </div>
         </div>
       </div>
@@ -261,6 +290,8 @@
   </div>
 
   <script>
+    let selectedContract = 10; // Default to 10-year
+
     function marginClass(margin) {
       if (margin >= 0.40) return 'good';
       if (margin >= 0.30) return 'warning';
@@ -270,18 +301,19 @@
     function update() {
       const rate = parseInt(document.getElementById('rateSlider').value);
       const duration = parseInt(document.getElementById('durationSlider').value);
+      const contractYrs = selectedContract;
 
       document.getElementById('rateValue').textContent = rate;
       document.getElementById('durationValue').textContent = duration;
 
-      // Prices and margins
-      const y1Price = PRICING.year1Price(rate, duration);
+      // Prices and margins (using selected contract)
+      const y1Price = PRICING.year1Price(rate, duration, contractYrs);
       const y1Cost = PRICING.year1Cost();
-      const y1Margin = PRICING.year1Margin(rate, duration);
+      const y1Margin = PRICING.year1Margin(rate, duration, contractYrs);
 
-      const y2Price = PRICING.year2Price(rate, duration);
+      const y2Price = PRICING.year2Price(rate, duration, contractYrs);
       const y2Cost = PRICING.year2Cost();
-      const y2Margin = PRICING.year2Margin(rate, duration);
+      const y2Margin = PRICING.year2Margin(rate, duration, contractYrs);
 
       document.getElementById('y1Price').textContent = PRICING.formatCurrency(y1Price);
       document.getElementById('y1Cost').textContent = '$' + Math.round(y1Cost).toLocaleString();
@@ -297,7 +329,7 @@
       const installBase = rate * 12;
       const overheadPerUnit = PRICING.overheadPerUnit(installBase);
       const y2CostEffective = y2Cost + overheadPerUnit;
-      const y2MarginEffective = PRICING.year2MarginWithOverhead(rate, duration, undefined, installBase);
+      const y2MarginEffective = PRICING.year2MarginWithOverhead(rate, duration, contractYrs, installBase);
 
       document.getElementById('overheadPerUnit').textContent = '$' + Math.round(overheadPerUnit).toLocaleString();
       document.getElementById('y2CostEffective').textContent = '$' + Math.round(y2CostEffective).toLocaleString();
@@ -411,11 +443,11 @@
 
       combos.forEach(c => {
         const isSelected = c.rate === rate && c.duration === duration;
-        const disc = PRICING.totalDiscount(c.rate, c.duration);
-        const y1p = PRICING.year1Price(c.rate, c.duration);
-        const y1m = PRICING.year1Margin(c.rate, c.duration);
-        const y2p = PRICING.year2Price(c.rate, c.duration);
-        const y2m = PRICING.year2Margin(c.rate, c.duration);
+        const disc = PRICING.totalDiscount(c.rate, c.duration, contractYrs);
+        const y1p = PRICING.year1Price(c.rate, c.duration, contractYrs);
+        const y1m = PRICING.year1Margin(c.rate, c.duration, contractYrs);
+        const y2p = PRICING.year2Price(c.rate, c.duration, contractYrs);
+        const y2m = PRICING.year2Margin(c.rate, c.duration, contractYrs);
 
         const row = document.createElement('tr');
         if (isSelected) row.classList.add('highlight');
@@ -434,6 +466,17 @@
 
     document.getElementById('rateSlider').addEventListener('input', update);
     document.getElementById('durationSlider').addEventListener('input', update);
+
+    // Contract button handlers
+    document.querySelectorAll('.contract-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.contract-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedContract = parseInt(btn.dataset.years);
+        update();
+      });
+    });
+
     update();
   </script>
 </body>
