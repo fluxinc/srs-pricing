@@ -169,7 +169,7 @@
     th:first-child, td:first-child { text-align: left; }
     tr:last-child td { border-bottom: none; }
 
-    .part-number { font-family: monospace; color: #86868b; font-size: 0.75rem; }
+    .part-number { font-family: monospace; color: #e84200; font-size: 1rem; font-weight: 600; }
     .price-main { font-size: 1.25rem; font-weight: 600; }
     .price-sub { font-size: 0.875rem; color: #86868b; }
     .discount-badge {
@@ -313,14 +313,14 @@
     </div>
 
     <div class="table-container">
-      <div class="table-title">Per-Unit Pricing Summary</div>
+      <div class="table-title">Per-Unit Pricing by Part Number</div>
       <table id="pricingTable">
         <thead>
           <tr>
-            <th>Contract</th>
+            <th>Part Number</th>
             <th>Year 1</th>
-            <th>Year 2+</th>
-            <th>5-Year Total</th>
+            <th>Year 2+ (per yr)</th>
+            <th>Total Price</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -469,7 +469,7 @@
       CONTRACT_YEARS.forEach(contractYrs => {
         const y1 = PRICING.year1Price(rate, duration, contractYrs);
         const y2 = PRICING.year2Price(rate, duration, contractYrs, fleetSize);
-        const total5yr = y1 + (y2 * 4);
+        const totalContract = y1 + (y2 * Math.max(0, contractYrs - 1));
         const y1Disc = PRICING.year1TotalDiscount(rate, duration, contractYrs);
         const y2Disc = PRICING.year2TotalDiscount(rate, duration, contractYrs, fleetSize);
 
@@ -479,19 +479,19 @@
 
         row.innerHTML = `
           <td>
-            <strong>${contractYrs}-Year</strong><br>
             <span class="part-number">FX-SRS-${contractYrs}YR</span>
           </td>
           <td>
             <div class="price-main">${PRICING.formatCurrency(y1)}</div>
-            ${y1Disc > 0 ? `<div class="price-sub" style="color: #4ade80;">${Math.round(y1Disc * 100)}% off</div>` : ''}
+            <div class="price-sub">${y1Disc > 0 ? Math.round(y1Disc * 100) + '% off' : 'no discount'}</div>
           </td>
           <td>
             <div class="price-main">${contractYrs > 1 ? PRICING.formatCurrency(y2) : '-'}</div>
-            ${contractYrs > 1 && y2Disc > 0 ? `<div class="price-sub" style="color: #4ade80;">${Math.round(y2Disc * 100)}% off</div>` : ''}
+            <div class="price-sub">${contractYrs > 1 ? (y2Disc > 0 ? Math.round(y2Disc * 100) + '% off' : 'no discount') : ''}</div>
           </td>
           <td>
-            <div class="price-main">${PRICING.formatCurrency(total5yr)}</div>
+            <div class="price-main">${PRICING.formatCurrency(totalContract)}</div>
+            <div class="price-sub">${contractYrs} year total</div>
           </td>
         `;
         tbody.appendChild(row);
