@@ -142,9 +142,10 @@ const PRICING = {
   },
 
   /**
-   * Year 1 price per unit (with 2 discount layers)
+   * Year 1 price per unit (with 2 discount layers + overhead)
    * Layer 1: Volume discount (at reduced rate - year1VolumeFactor)
    * Layer 2: Contract discount (full)
+   * Plus: Overhead recovery for commitment period (not discounted)
    */
   year1Price(monthlyRate, commitYears, contractYears) {
     const basePrice = this.year1Base;
@@ -152,7 +153,9 @@ const PRICING = {
     const volumeDisc = this.volumeDiscount(totalUnits) * CONFIG.discounts.year1VolumeFactor;
     const contractDisc = this.contractDiscount(contractYears);
     const totalDisc = volumeDisc + contractDisc;
-    return this.roundUp50(basePrice * (1 - totalDisc));
+    const discountedBase = basePrice * (1 - totalDisc);
+    const overhead = this.commitmentOverheadPerUnit(monthlyRate, commitYears);
+    return this.roundUp50(discountedBase + overhead);
   },
 
   /**
@@ -223,6 +226,16 @@ const PRICING = {
   },
 
   /**
+   * Overhead burden per unit for commitment period
+   * Accounts for overhead needed during the ramp-up period
+   */
+  commitmentOverheadPerUnit(monthlyRate, commitYears) {
+    const totalUnits = this.totalCommitment(monthlyRate, commitYears);
+    if (totalUnits <= 0) return 0;
+    return (this.annualOverhead() * commitYears) / totalUnits;
+  },
+
+  /**
    * Year 1 margin
    */
   year1Margin(monthlyRate, commitYears, contractYears) {
@@ -264,6 +277,7 @@ const PRICING = {
   getDiscountBreakdown(monthlyRate, commitYears, contractYears) {
     const totalUnits = this.totalCommitment(monthlyRate, commitYears);
     const volumeDisc = this.volumeDiscount(totalUnits);
+    const overhead = this.commitmentOverheadPerUnit(monthlyRate, commitYears);
     return {
       volume: volumeDisc,
       volumeY1: volumeDisc * CONFIG.discounts.year1VolumeFactor,
@@ -271,6 +285,7 @@ const PRICING = {
       totalY1: this.year1TotalDiscount(monthlyRate, commitYears, contractYears),
       totalY2: this.year2TotalDiscount(monthlyRate, commitYears, contractYears),
       totalUnits: totalUnits,
+      overheadPerUnit: overhead,
     };
   },
 

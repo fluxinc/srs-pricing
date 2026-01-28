@@ -427,12 +427,14 @@
       // Cost breakdowns
       const C = CONFIG;
       const coordCost = C.labor.coordinationHoursPerUnitYear * C.labor.hourlyRate;
+      const overheadRecovery = PRICING.commitmentOverheadPerUnit(rate, duration);
       document.getElementById('y1Breakdown').innerHTML = `
         <div class="cost-row"><span>Hardware</span><span>$${C.hardware.fluxBox}</span></div>
         <div class="cost-row"><span>Build Labor (${C.labor.buildHoursPerUnit}hrs x $${C.labor.hourlyRate})</span><span>$${C.labor.buildHoursPerUnit * C.labor.hourlyRate}</span></div>
         <div class="cost-row"><span>Support (${C.labor.supportHoursPerUnitYear}hrs x $${C.labor.hourlyRate})</span><span>$${C.labor.supportHoursPerUnitYear * C.labor.hourlyRate}</span></div>
         <div class="cost-row"><span>Coordination (${C.labor.coordinationHoursPerUnitYear}hrs x $${C.labor.hourlyRate})</span><span>$${coordCost}</span></div>
-        <div class="cost-row total"><span>Total Cost</span><span>$${Math.ceil(y1Cost)}</span></div>
+        <div class="cost-row"><span>Overhead (${duration}yr commitment)</span><span>$${Math.ceil(overheadRecovery)}</span></div>
+        <div class="cost-row total"><span>Total Cost + Overhead</span><span>$${Math.ceil(y1Cost + overheadRecovery)}</span></div>
       `;
 
       document.getElementById('y2Breakdown').innerHTML = `
@@ -446,9 +448,11 @@
 
       document.getElementById('discountBreakdown').innerHTML = `
         <div class="cost-row"><span>Total Commitment</span><span>${totalUnits} units</span></div>
+        <div class="cost-row"><span>Commitment Duration</span><span>${duration} years</span></div>
         <div class="cost-row"><span>1. Volume Discount (full)</span><span>${PRICING.formatPercent(discounts.volume)}</span></div>
         <div class="cost-row"><span>1. Volume Discount (Y1 @ 50%)</span><span>${PRICING.formatPercent(discounts.volumeY1)}</span></div>
         <div class="cost-row"><span>2. Contract Discount (${contractYrs}yr)</span><span>${PRICING.formatPercent(discounts.contract)}</span></div>
+        <div class="cost-row"><span>+ Overhead Recovery</span><span>$${Math.round(discounts.overheadPerUnit)}/unit</span></div>
         <div class="cost-row total"><span>Total Y1 Discount</span><span>${PRICING.formatPercent(discounts.totalY1)}</span></div>
         <div class="cost-row total"><span>Total Y2+ Discount</span><span class="good">${PRICING.formatPercent(discounts.totalY2)}</span></div>
       `;
