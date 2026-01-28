@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flux Mobile SRS Bridge Pricing</title>
+  <title>Flux Mobile SRS Bridge - Fleet Discount Program</title>
   <script src="config.js"></script>
   <script src="pricing.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -28,6 +28,7 @@
     h1 { font-size: 2rem; font-weight: 600; }
 
     .subtitle { color: #86868b; margin-bottom: 2rem; }
+    .tagline { color: #e84200; font-weight: 500; }
 
     .controls {
       background: #1c1c1e;
@@ -41,6 +42,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 2rem;
+      margin-bottom: 1rem;
     }
 
     @media (max-width: 600px) {
@@ -79,7 +81,76 @@
       border: none;
     }
 
-    .slider-value { font-size: 1.25rem; font-weight: 600; min-width: 80px; text-align: right; }
+    .slider-value { font-size: 1.25rem; font-weight: 600; min-width: 100px; text-align: right; }
+
+    .contract-buttons { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .contract-btn {
+      background: #2c2c2e;
+      border: 1px solid #3a3a3c;
+      color: #f5f5f7;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+    .contract-btn:hover { background: #3a3a3c; }
+    .contract-btn.active {
+      background: #e84200;
+      border-color: #e84200;
+      font-weight: 600;
+    }
+
+    .discount-highlight {
+      background: linear-gradient(135deg, #1a3a1a 0%, #1c1c1e 100%);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #2d5a2d;
+      text-align: center;
+    }
+
+    .discount-title {
+      font-size: 0.875rem;
+      color: #86868b;
+      margin-bottom: 0.5rem;
+    }
+
+    .discount-amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #4ade80;
+    }
+
+    .discount-subtitle {
+      font-size: 0.875rem;
+      color: #86868b;
+      margin-top: 0.5rem;
+    }
+
+    .discount-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .discount-item {
+      text-align: center;
+    }
+
+    .discount-label {
+      font-size: 0.75rem;
+      color: #86868b;
+    }
+
+    .discount-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .discount-value.active { color: #4ade80; }
 
     .table-container {
       background: #1c1c1e;
@@ -112,7 +183,35 @@
       margin-left: 0.5rem;
     }
 
-    .footer { margin-top: 2rem; text-align: center; color: #86868b; font-size: 0.875rem; }
+    .fleet-tiers-table {
+      background: #1c1c1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid #2c2c2e;
+      margin-bottom: 1.5rem;
+    }
+
+    .fleet-tiers-table table {
+      width: 100%;
+    }
+
+    .fleet-tiers-table th {
+      text-align: left;
+      padding: 0.5rem;
+    }
+
+    .fleet-tiers-table td {
+      padding: 0.5rem;
+    }
+
+    .fleet-tiers-table tr.current-tier {
+      background: rgba(74, 222, 128, 0.1);
+    }
+
+    .fleet-tiers-table .tier-marker {
+      color: #4ade80;
+      font-weight: 600;
+    }
 
     .chart-container {
       background: #1c1c1e;
@@ -128,74 +227,164 @@
       position: relative;
       height: 280px;
     }
+
+    .footer { margin-top: 2rem; text-align: center; color: #86868b; font-size: 0.875rem; }
+
+    .pitch-section {
+      background: #1c1c1e;
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #2c2c2e;
+    }
+
+    .pitch-section h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: #e84200;
+    }
+
+    .pitch-section p {
+      color: #a1a1a6;
+      margin-bottom: 0.75rem;
+    }
+
+    .pitch-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .pitch-section li {
+      padding: 0.25rem 0;
+      color: #a1a1a6;
+    }
+
+    .pitch-section li::before {
+      content: "-> ";
+      color: #e84200;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
       <img src="logo.png" alt="Flux" class="logo">
-      <h1>Flux Mobile SRS Bridge Pricing</h1>
+      <h1>Flux Mobile SRS Bridge</h1>
     </div>
-    <p class="subtitle">Select your commitment level to see pricing for each contract option</p>
+    <p class="subtitle">
+      <span class="tagline">Fleet Discount Program: "Grow With Us, Share the Savings"</span>
+    </p>
 
     <div class="controls">
       <div class="control-row">
         <div>
-          <label>Monthly Commitment</label>
+          <label>Monthly Commitment (units/mo)</label>
           <div class="slider-container">
             <input type="range" id="rateSlider" min="10" max="25" step="5" value="10" aria-label="Monthly commitment">
             <span class="slider-value"><span id="rateValue">10</span>/mo</span>
           </div>
         </div>
         <div>
-          <label>Commitment Duration</label>
+          <label>Commitment Duration (years)</label>
           <div class="slider-container">
-            <input type="range" id="durationSlider" min="1" max="10" step="1" value="5" aria-label="Commitment duration">
-            <span class="slider-value"><span id="durationValue">5</span> yr</span>
+            <input type="range" id="durationSlider" min="1" max="10" step="1" value="1" aria-label="Commitment duration">
+            <span class="slider-value"><span id="durationValue">1</span> yr</span>
           </div>
         </div>
       </div>
-    </div>
-
-    <div class="chart-container">
-      <div class="chart-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+      <div class="control-row">
         <div>
-          <div class="chart-title" style="margin-bottom: 0.25rem;">Total Value: <span id="chartTitle">10-Year Commitment</span></div>
-          <div class="chart-subtitle" id="chartSavings" style="color: #e84200; font-size: 0.9rem;"></div>
-        </div>
-        <div class="discount-badges" style="display: flex; gap: 1rem; text-align: center;">
-          <div>
-            <div style="font-size: 0.7rem; color: #86868b;">Rate Discount</div>
-            <div id="rateDiscount" style="font-size: 1.1rem; font-weight: 600; color: #e84200;">0% off</div>
-          </div>
-          <div>
-            <div style="font-size: 0.7rem; color: #86868b;">Duration Discount</div>
-            <div id="durationDiscount" style="font-size: 1.1rem; font-weight: 600; color: #e84200;">0% off</div>
-          </div>
-          <div>
-            <div style="font-size: 0.7rem; color: #86868b;">Units Deployed</div>
-            <div id="totalUnits" style="font-size: 1.1rem; font-weight: 600;">0</div>
+          <label>Projection Period (years)</label>
+          <div class="slider-container">
+            <input type="range" id="projectionSlider" min="1" max="10" step="1" value="10" aria-label="Projection period">
+            <span class="slider-value"><span id="projectionValue">10</span> yr</span>
           </div>
         </div>
-      </div>
-      <div class="chart-wrapper">
-        <canvas id="savingsChart"></canvas>
+        <div>
+          <label>Contract Length</label>
+          <div class="contract-buttons" id="contractButtons">
+            <button class="contract-btn" data-years="1">1-Year</button>
+            <button class="contract-btn" data-years="3">3-Year</button>
+            <button class="contract-btn active" data-years="5">5-Year</button>
+            <button class="contract-btn" data-years="10">10-Year</button>
+          </div>
+        </div>
       </div>
     </div>
 
     <div class="table-container">
-      <div class="table-title">Per-Unit Contract Pricing</div>
+      <div class="table-title">Per-Unit Pricing Summary</div>
       <table id="pricingTable">
         <thead>
           <tr>
             <th>Contract</th>
             <th>Year 1</th>
             <th>Year 2+</th>
-            <th>Total</th>
+            <th>5-Year Total</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
+    </div>
+
+    <div class="discount-highlight">
+      <div class="discount-title">Your Total Year 2+ Discount (at <span id="fleetSizeDisplay">360</span> units deployed)</div>
+      <div class="discount-amount" id="totalY2Discount">43%</div>
+      <div class="discount-subtitle">
+        Y2+ Price: <span id="y2PriceDisplay">$850</span>/unit/year (base: $1,550)
+      </div>
+      <div class="discount-breakdown">
+        <div class="discount-item">
+          <div class="discount-label">Rate</div>
+          <div class="discount-value" id="rateDiscValue">0%</div>
+        </div>
+        <div class="discount-item">
+          <div class="discount-label">Duration</div>
+          <div class="discount-value" id="durationDiscValue">0%</div>
+        </div>
+        <div class="discount-item">
+          <div class="discount-label">Contract</div>
+          <div class="discount-value" id="contractDiscValue">10%</div>
+        </div>
+        <div class="discount-item">
+          <div class="discount-label">Fleet Size</div>
+          <div class="discount-value active" id="fleetDiscValue">16%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fleet-tiers-table">
+      <div class="table-title">Fleet Size Discount Tiers (Year 2+ only)</div>
+      <table id="fleetTiersTable">
+        <thead>
+          <tr>
+            <th>Fleet Size</th>
+            <th>Fleet Discount</th>
+            <th>Example Y2+ Price</th>
+            <th>Savings vs Base</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="chart-container">
+      <div class="chart-title">Year 2+ Price by Fleet Size (with your commitment)</div>
+      <div class="chart-wrapper">
+        <canvas id="priceChart"></canvas>
+      </div>
+    </div>
+
+    <div class="pitch-section">
+      <h2>How Your Discounts Work</h2>
+      <p>Your pricing is based on four factors that combine to give you the best possible price:</p>
+      <ul>
+        <li><strong>Rate Commitment:</strong> Higher monthly orders unlock deeper discounts</li>
+        <li><strong>Duration Commitment:</strong> Longer purchasing commitments earn additional savings</li>
+        <li><strong>Contract Length:</strong> Multi-year contracts reduce per-unit pricing</li>
+        <li><strong>Fleet Size:</strong> As your deployed fleet grows, you unlock Year 2+ discounts</li>
+      </ul>
+      <p style="margin-top: 1rem;"><strong>The bigger your fleet, the more you save on ongoing support costs.</strong></p>
     </div>
 
     <div class="footer" id="footer"></div>
@@ -203,21 +392,75 @@
 
   <script>
     const CONTRACT_YEARS = [1, 3, 5, 10];
+    let selectedContract = 5;
 
     function update() {
       const rate = parseInt(document.getElementById('rateSlider').value);
       const duration = parseInt(document.getElementById('durationSlider').value);
+      const projectionYears = parseInt(document.getElementById('projectionSlider').value);
+
+      // Fleet size grows based on order rate during commitment period
+      // Fleet stops growing once commitment ends
+      // fleetSize = rate × 12 × min(projection, commitment)
+      const fleetSize = rate * 12 * Math.min(projectionYears, duration);
 
       document.getElementById('rateValue').textContent = rate;
       document.getElementById('durationValue').textContent = duration;
+      document.getElementById('projectionValue').textContent = projectionYears;
 
-      // Discount summary
-      const rateDisc = PRICING.rateDiscount(rate);
-      const durationDisc = PRICING.durationDiscount(duration);
+      // Get discount breakdown
+      const discounts = PRICING.getDiscountBreakdown(rate, duration, selectedContract, fleetSize);
 
-      document.getElementById('rateDiscount').textContent = PRICING.formatPercent(rateDisc) + ' off';
-      document.getElementById('durationDiscount').textContent = PRICING.formatPercent(durationDisc) + ' off';
-      document.getElementById('totalUnits').textContent = (rate * 12 * duration).toLocaleString();
+      // Display discount breakdown
+      document.getElementById('rateDiscValue').textContent = Math.round(discounts.rate * 100) + '%';
+      document.getElementById('durationDiscValue').textContent = Math.round(discounts.duration * 100) + '%';
+      document.getElementById('contractDiscValue').textContent = Math.round(discounts.contract * 100) + '%';
+      document.getElementById('fleetDiscValue').textContent = Math.round(discounts.fleet * 100) + '%';
+
+      // Highlight active discounts
+      document.getElementById('rateDiscValue').className = 'discount-value' + (discounts.rate > 0 ? ' active' : '');
+      document.getElementById('durationDiscValue').className = 'discount-value' + (discounts.duration > 0 ? ' active' : '');
+      document.getElementById('contractDiscValue').className = 'discount-value' + (discounts.contract > 0 ? ' active' : '');
+      document.getElementById('fleetDiscValue').className = 'discount-value' + (discounts.fleet > 0 ? ' active' : '');
+
+      // Total Y2+ discount and price
+      const totalY2Disc = discounts.totalY2;
+      const y2Price = PRICING.year2Price(rate, duration, selectedContract, fleetSize);
+      document.getElementById('totalY2Discount').textContent = Math.round(totalY2Disc * 100) + '%';
+      document.getElementById('y2PriceDisplay').textContent = PRICING.formatCurrency(y2Price);
+      document.getElementById('fleetSizeDisplay').textContent = fleetSize;
+
+      // Fleet tiers table
+      const fleetTbody = document.querySelector('#fleetTiersTable tbody');
+      fleetTbody.innerHTML = '';
+
+      const tiers = [
+        { label: '1-49 units', min: 1, max: 49 },
+        { label: '50-99 units', min: 50, max: 99 },
+        { label: '100-249 units', min: 100, max: 249 },
+        { label: '250-499 units', min: 250, max: 499 },
+        { label: '500+ units', min: 500, max: Infinity },
+      ];
+
+      const baseY2 = CONFIG.prices.year2;
+
+      tiers.forEach(tier => {
+        const fleetDisc = PRICING.year2FleetDiscount(tier.min);
+        const examplePrice = PRICING.year2Price(rate, duration, selectedContract, tier.min);
+        const savings = baseY2 - examplePrice;
+        const isCurrent = fleetSize >= tier.min && fleetSize <= tier.max;
+
+        const row = document.createElement('tr');
+        if (isCurrent) row.classList.add('current-tier');
+
+        row.innerHTML = `
+          <td>${isCurrent ? '<span class="tier-marker">-></span> ' : ''}${tier.label}</td>
+          <td>${Math.round(fleetDisc * 100)}%</td>
+          <td>${PRICING.formatCurrency(examplePrice)}/year</td>
+          <td>$${savings.toLocaleString()} off/unit/year</td>
+        `;
+        fleetTbody.appendChild(row);
+      });
 
       // Pricing table
       const tbody = document.querySelector('#pricingTable tbody');
@@ -225,82 +468,89 @@
 
       CONTRACT_YEARS.forEach(contractYrs => {
         const y1 = PRICING.year1Price(rate, duration, contractYrs);
-        const y2 = PRICING.year2Price(rate, duration, contractYrs);
-        const total = PRICING.contractPrice(rate, duration, contractYrs);
-        const contractDisc = PRICING.contractDiscount(contractYrs);
-        const totalDisc = PRICING.totalDiscount(rate, duration, contractYrs);
+        const y2 = PRICING.year2Price(rate, duration, contractYrs, fleetSize);
+        const total5yr = y1 + (y2 * 4);
+        const y1Disc = PRICING.year1TotalDiscount(rate, duration, contractYrs);
+        const y2Disc = PRICING.year2TotalDiscount(rate, duration, contractYrs, fleetSize);
 
         const row = document.createElement('tr');
+        const isSelected = contractYrs === selectedContract;
+        if (isSelected) row.style.background = 'rgba(232, 66, 0, 0.1)';
+
         row.innerHTML = `
           <td>
             <strong>${contractYrs}-Year</strong><br>
             <span class="part-number">FX-SRS-${contractYrs}YR</span>
-            ${contractDisc > 0 ? `<span class="discount-badge">+${Math.round(contractDisc * 100)}% off</span>` : ''}
           </td>
           <td>
             <div class="price-main">${PRICING.formatCurrency(y1)}</div>
+            ${y1Disc > 0 ? `<div class="price-sub" style="color: #4ade80;">${Math.round(y1Disc * 100)}% off</div>` : ''}
           </td>
           <td>
-            <div class="price-main">${contractYrs > 1 ? PRICING.formatCurrency(y2) : '—'}</div>
-            <div class="price-sub">${contractYrs > 1 ? '/year' : ''}</div>
+            <div class="price-main">${contractYrs > 1 ? PRICING.formatCurrency(y2) : '-'}</div>
+            ${contractYrs > 1 && y2Disc > 0 ? `<div class="price-sub" style="color: #4ade80;">${Math.round(y2Disc * 100)}% off</div>` : ''}
           </td>
           <td>
-            <div class="price-main">${PRICING.formatCurrency(total)}</div>
-            <div class="price-sub"><span style="color: #e84200; font-weight: 600;">${PRICING.formatPercent(totalDisc)} off</span></div>
+            <div class="price-main">${PRICING.formatCurrency(total5yr)}</div>
           </td>
         `;
         tbody.appendChild(row);
       });
 
       // Update chart
-      updateChart(rate, duration);
+      updateChart(rate, duration, fleetSize);
+
+      // Footer
+      const nextTier = PRICING.getNextFleetTier(fleetSize);
+      let footerText = `At ${rate}/mo for ${projectionYears} years = ${fleetSize} units deployed. `;
+      if (nextTier) {
+        const monthsToNext = Math.ceil((nextTier.minUnits - fleetSize) / rate);
+        footerText += `${nextTier.minUnits - fleetSize} more units (${monthsToNext} months) unlocks ${Math.round(nextTier.discount * 100)}% fleet discount.`;
+      } else {
+        footerText += 'Maximum fleet discount tier achieved!';
+      }
+      document.getElementById('footer').textContent = footerText;
     }
+
+    // Contract button handlers
+    document.querySelectorAll('.contract-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.contract-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedContract = parseInt(btn.dataset.years);
+        update();
+      });
+    });
 
     document.getElementById('rateSlider').addEventListener('input', update);
     document.getElementById('durationSlider').addEventListener('input', update);
+    document.getElementById('projectionSlider').addEventListener('input', update);
 
-    // Compute footer from config
-    const minRate = parseInt(document.getElementById('rateSlider').min);
-    const minRateDisc = PRICING.rateDiscount(minRate);
-    document.getElementById('footer').innerHTML = `
-      Baseline: ${PRICING.formatCurrency(PRICING.baseline5yr)} per unit (5-year contract with no commitment).<br>
-      Commit to ${minRate}/mo minimum = ~${Math.round(minRateDisc * 100)}% off. Higher rate + longer commitment + longer contract = better pricing.
-    `;
-
-    // Initialize savings chart
-    const ctx = document.getElementById('savingsChart').getContext('2d');
-    const savingsChart = new Chart(ctx, {
+    // Initialize price chart
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const priceChart = new Chart(ctx, {
       type: 'line',
       data: {
-        labels: [],
+        labels: ['25', '50', '100', '150', '200', '250', '300', '400', '500', '600'],
         datasets: [
           {
-            label: 'Baseline (No Commitment)',
-            data: [],
-            borderColor: '#86868b',
-            backgroundColor: 'rgba(134, 134, 139, 0.1)',
-            borderWidth: 2,
-            fill: false,
-            tension: 0.1,
-          },
-          {
-            label: 'Your Price (With Discounts)',
+            label: 'Year 2+ Price',
             data: [],
             borderColor: '#e84200',
-            backgroundColor: 'rgba(232, 66, 0, 0.2)',
-            borderWidth: 2,
-            fill: '-1',
-            tension: 0.1,
+            backgroundColor: 'rgba(232, 66, 0, 0.1)',
+            fill: true,
+            tension: 0.3,
+            pointRadius: 4,
+            pointBackgroundColor: '#e84200',
           }
         ]
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { intersect: false, mode: 'index' },
         plugins: {
           legend: {
-            labels: { color: '#f5f5f7', usePointStyle: true }
+            display: false
           },
           tooltip: {
             backgroundColor: '#1c1c1e',
@@ -309,55 +559,42 @@
             borderColor: '#3a3a3c',
             borderWidth: 1,
             callbacks: {
-              label: ctx => ctx.dataset.label + ': $' + ctx.raw.toLocaleString()
+              label: ctx => 'Y2+ Price: $' + ctx.raw.toLocaleString()
             }
           }
         },
         scales: {
           x: {
-            title: { display: true, text: 'Year', color: '#86868b' },
+            title: { display: true, text: 'Fleet Size (units)', color: '#86868b' },
             ticks: { color: '#86868b' },
             grid: { color: '#2c2c2e' }
           },
           y: {
-            title: { display: true, text: 'Contract Value ($1,000s)', color: '#86868b' },
-            ticks: { color: '#86868b', callback: v => '$' + (v / 1000).toLocaleString() },
+            title: { display: true, text: 'Year 2+ Price ($)', color: '#86868b' },
+            ticks: { color: '#86868b', callback: v => '$' + v },
             grid: { color: '#2c2c2e' }
           }
         }
       }
     });
 
-    function updateChart(rate, duration) {
-      const contractYrs = 10; // Using 10-year contracts
-      const years = Array.from({ length: duration }, (_, i) => i + 1);
-      const unitsPerYear = rate * 12;
+    function updateChart(rate, duration, currentFleet) {
+      const fleetSizes = [25, 50, 100, 150, 200, 250, 300, 400, 500, 600];
+      const prices = fleetSizes.map(fleet => PRICING.year2Price(rate, duration, selectedContract, fleet));
 
-      // Baseline price per unit (no commitment discount)
-      const baseUnitTotal = PRICING.year1Base + CONFIG.prices.year2 * (contractYrs - 1);
+      priceChart.data.datasets[0].data = prices;
 
-      // Discounted price per unit
-      const discUnitTotal = PRICING.contractPrice(rate, duration, contractYrs);
+      // Highlight current fleet position
+      const currentIdx = fleetSizes.findIndex((f, i) => {
+        const next = fleetSizes[i + 1] || Infinity;
+        return currentFleet >= f && currentFleet < next;
+      });
+      priceChart.data.datasets[0].pointRadius = fleetSizes.map((f, i) => {
+        if (i === currentIdx || (currentIdx === -1 && f >= currentFleet)) return 8;
+        return 4;
+      });
 
-      // Cumulative units purchased over time
-      // Year 1: rate*12 units, Year 2: rate*24 units, etc.
-      const baselineCumulative = years.map(yr => unitsPerYear * yr * baseUnitTotal);
-      const discountedCumulative = years.map(yr => unitsPerYear * yr * discUnitTotal);
-
-      // Total savings
-      const totalBaseline = unitsPerYear * duration * baseUnitTotal;
-      const totalDiscounted = unitsPerYear * duration * discUnitTotal;
-      const totalSavings = totalBaseline - totalDiscounted;
-      const savingsPct = ((totalBaseline - totalDiscounted) / totalBaseline * 100).toFixed(0);
-
-      document.getElementById('chartTitle').textContent = `${rate}/mo × ${duration} Years (10-Year Contracts)`;
-      document.getElementById('chartSavings').textContent =
-        `Total: $${Math.ceil(totalDiscounted).toLocaleString()} — Save $${Math.ceil(totalSavings).toLocaleString()} (${savingsPct}% off baseline)`;
-
-      savingsChart.data.labels = years.map(y => 'Year ' + y);
-      savingsChart.data.datasets[0].data = baselineCumulative;
-      savingsChart.data.datasets[1].data = discountedCumulative;
-      savingsChart.update();
+      priceChart.update();
     }
 
     update();

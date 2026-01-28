@@ -27,6 +27,14 @@ const CONFIG = {
   },
 
   // ============================================================
+  // EFFICIENCY SCALING (support hours decrease over time)
+  // ============================================================
+  efficiency: {
+    supportDecayRate: 0.90,       // 10% improvement per year
+    supportFloor: 0.625,          // Floor at 62.5% (5 hrs minimum from 8 base)
+  },
+
+  // ============================================================
   // FIXED OVERHEAD (regardless of install base)
   // ============================================================
   overhead: {
@@ -44,30 +52,52 @@ const CONFIG = {
   },
 
   // ============================================================
-  // DISCOUNT SETTINGS
+  // COMMITMENT DISCOUNTS (rate + duration)
   // ============================================================
   discounts: {
-    // Rate commitment discount (monthly units)
-    // Baseline is 0 (no commitment) - slider starts at 10, which already earns ~13% discount
-    minRate: 0,                       // Baseline: no commitment (conceptual)
-    maxRate: 20,                      // Maximum for full rate discount
-    maxRateDiscount: 0.25,            // 20% max from higher rate
+    // Rate commitment (monthly order rate)
+    minRate: 0,                       // Minimum rate for discount calculation
+    maxRate: 20,                      // Rate at which max discount is reached
+    maxRateDiscount: 0.25,            // Max discount from rate commitment (25%)
 
-    // Duration commitment discount (years of commitment to purchase)
-    // Baseline is 0 (no commitment) - slider starts at 1yr, which earns ~3% discount
-    minDuration: 0,                   // Baseline: no commitment (conceptual)
-    maxDuration: 10,                  // Maximum for full duration discount
-    maxDurationDiscount: 0.18,        // 15% max from longer commitment
+    // Duration commitment (years of purchasing)
+    minDuration: 0,                   // Minimum duration for discount calculation
+    maxDuration: 10,                  // Duration at which max discount is reached
+    maxDurationDiscount: 0.18,        // Max discount from duration commitment (18%)
 
-    // Contract length discount (per-unit contract term)
-    contractDiscounts: {
-      1: 0.00,                        // 1-year contract: no additional discount
-      3: 0.05,                        // 3-year contract: 5% additional
-      5: 0.10,                        // 5-year contract: 10% additional
-      10: 0.15,                       // 10-year contract: 15% additional
-    },
+    // Year 1 discount factor (commitment discounts apply at reduced rate to Y1)
+    year1DiscountFactor: 0.5,         // Y1 gets 50% of the commitment discount
+  },
 
-    // How much Year 1 is discounted (hardware cost limits discount)
-    year1DiscountFactor: 0.5,         // Year 1 gets 50% of total discount
+  // ============================================================
+  // FLEET DISCOUNT TIERS
+  // ============================================================
+  fleetDiscounts: {
+    // Year 1 volume discount (based on units ordered)
+    // Sorted descending by minUnits for lookup efficiency
+    year1Tiers: [
+      { minUnits: 250, discount: 0.17 },  // 250+ units: 17% off Y1
+      { minUnits: 100, discount: 0.11 },  // 100-249 units: 11% off Y1
+      { minUnits: 50, discount: 0.06 },   // 50-99 units: 6% off Y1
+    ],
+
+    // Year 2+ fleet discount (based on deployed fleet size)
+    // Sorted descending by minUnits for lookup efficiency
+    year2Tiers: [
+      { minUnits: 500, discount: 0.29 },  // 500+ units: 29% off Y2+
+      { minUnits: 250, discount: 0.23 },  // 250-499 units: 23% off Y2+
+      { minUnits: 100, discount: 0.16 },  // 100-249 units: 16% off Y2+
+      { minUnits: 50, discount: 0.10 },   // 50-99 units: 10% off Y2+
+    ],
+  },
+
+  // ============================================================
+  // CONTRACT LENGTH DISCOUNTS
+  // ============================================================
+  contractDiscounts: {
+    1: 0.00,                          // 1-year contract: no discount
+    3: 0.05,                          // 3-year contract: 5% off
+    5: 0.10,                          // 5-year contract: 10% off
+    10: 0.15,                         // 10-year contract: 15% off
   },
 };
