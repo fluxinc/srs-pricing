@@ -352,7 +352,7 @@
 
       document.getElementById('chartTitle').textContent = `${rate}/mo × ${duration} Years (10-Year Contracts)`;
       document.getElementById('chartSavings').textContent =
-        `Total: $${Math.round(totalDiscounted).toLocaleString()} — Save $${Math.round(totalSavings).toLocaleString()} (${savingsPct}% off baseline)`;
+        `Total: $${Math.ceil(totalDiscounted).toLocaleString()} — Save $${Math.ceil(totalSavings).toLocaleString()} (${savingsPct}% off baseline)`;
 
       savingsChart.data.labels = years.map(y => 'Year ' + y);
       savingsChart.data.datasets[0].data = baselineCumulative;
