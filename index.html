@@ -12,7 +12,7 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0d0d0d;
+      background: #222222;
       color: #f5f5f7;
       line-height: 1.5;
       padding: 2rem;
@@ -20,7 +20,12 @@
 
     .container { max-width: 900px; margin: 0 auto; }
 
-    h1 { font-size: 2rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .logo {
+      height: 40px;
+      width: auto;
+    }
+    h1 { font-size: 2rem; font-weight: 600; }
 
     .subtitle { color: #86868b; margin-bottom: 2rem; }
 
@@ -60,7 +65,7 @@
       -webkit-appearance: none;
       width: 24px;
       height: 24px;
-      background: #0a84ff;
+      background: #e84200;
       border-radius: 50%;
       cursor: pointer;
     }
@@ -68,7 +73,7 @@
     input[type="range"]::-moz-range-thumb {
       width: 24px;
       height: 24px;
-      background: #0a84ff;
+      background: #e84200;
       border-radius: 50%;
       cursor: pointer;
       border: none;
@@ -91,7 +96,7 @@
 
     .discount-item { text-align: center; }
     .discount-label { font-size: 0.75rem; color: #86868b; }
-    .discount-value { font-size: 1.25rem; font-weight: 600; color: #30d158; }
+    .discount-value { font-size: 1.25rem; font-weight: 600; color: #e84200; }
 
     .table-container {
       background: #1c1c1e;
@@ -115,8 +120,8 @@
     .price-sub { font-size: 0.875rem; color: #86868b; }
     .discount-badge {
       display: inline-block;
-      background: #30d158;
-      color: #0d0d0d;
+      background: #e84200;
+      color: #222222;
       padding: 0.1rem 0.4rem;
       border-radius: 4px;
       font-size: 0.7rem;
@@ -134,7 +139,7 @@
     }
     .discount-bar {
       height: 100%;
-      background: linear-gradient(90deg, #30d158, #34c759);
+      background: linear-gradient(90deg, #e84200, #ff6b35);
       border-radius: 4px;
       transition: width 0.3s ease;
     }
@@ -159,7 +164,10 @@
 </head>
 <body>
   <div class="container">
-    <h1>Flux Box Pricing</h1>
+    <div class="header">
+      <img src="logo.png" alt="Flux" class="logo">
+      <h1>Flux Box Pricing</h1>
+    </div>
     <p class="subtitle">Select your commitment level to see pricing for each contract option</p>
 
     <div class="controls">
@@ -200,7 +208,7 @@
 
     <div class="chart-container">
       <div class="chart-title">Total Spend: <span id="chartTitle">10-Year Commitment</span></div>
-      <div class="chart-subtitle" id="chartSavings" style="color: #30d158; font-size: 0.9rem; margin-bottom: 0.5rem;"></div>
+      <div class="chart-subtitle" id="chartSavings" style="color: #e84200; font-size: 0.9rem; margin-bottom: 0.5rem;"></div>
       <div class="chart-wrapper">
         <canvas id="savingsChart"></canvas>
       </div>
@@ -274,7 +282,7 @@
           </td>
           <td>
             <div class="price-main">${PRICING.formatCurrency(total)}</div>
-            <div class="price-sub"><span style="color: #30d158; font-weight: 600;">${PRICING.formatPercent(totalDisc)} off</span></div>
+            <div class="price-sub"><span style="color: #e84200; font-weight: 600;">${PRICING.formatPercent(totalDisc)} off</span></div>
           </td>
         `;
         tbody.appendChild(row);
@@ -314,8 +322,8 @@
           {
             label: 'With Your Discounts',
             data: [],
-            borderColor: '#30d158',
-            backgroundColor: 'rgba(48, 209, 88, 0.2)',
+            borderColor: '#e84200',
+            backgroundColor: 'rgba(232, 66, 0, 0.2)',
             borderWidth: 2,
             fill: '-1',
             tension: 0.1,

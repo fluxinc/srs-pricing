@@ -50,14 +50,14 @@ const CONFIG = {
     // Rate commitment discount (monthly units)
     // Baseline is 0 (no commitment) - slider starts at 10, which already earns ~13% discount
     minRate: 0,                       // Baseline: no commitment (conceptual)
-    maxRate: 25,                      // Maximum for full rate discount
+    maxRate: 20,                      // Maximum for full rate discount
     maxRateDiscount: 0.25,            // 20% max from higher rate
 
     // Duration commitment discount (years of commitment to purchase)
     // Baseline is 0 (no commitment) - slider starts at 1yr, which earns ~3% discount
     minDuration: 0,                   // Baseline: no commitment (conceptual)
     maxDuration: 10,                  // Maximum for full duration discount
-    maxDurationDiscount: 0.15,        // 15% max from longer commitment
+    maxDurationDiscount: 0.18,        // 15% max from longer commitment
 
     // Contract length discount (per-unit contract term)
     contractDiscounts: {
