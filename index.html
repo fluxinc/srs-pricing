@@ -160,7 +160,7 @@
     <div class="chart-container">
       <div class="chart-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
         <div>
-          <div class="chart-title" style="margin-bottom: 0.25rem;">Total Spend: <span id="chartTitle">10-Year Commitment</span></div>
+          <div class="chart-title" style="margin-bottom: 0.25rem;">Total Value: <span id="chartTitle">10-Year Commitment</span></div>
           <div class="chart-subtitle" id="chartSavings" style="color: #e84200; font-size: 0.9rem;"></div>
         </div>
         <div class="discount-badges" style="display: flex; gap: 1rem; text-align: center;">
@@ -320,8 +320,8 @@
             grid: { color: '#2c2c2e' }
           },
           y: {
-            title: { display: true, text: 'Cumulative Spend ($)', color: '#86868b' },
-            ticks: { color: '#86868b', callback: v => '$' + v.toLocaleString() },
+            title: { display: true, text: 'Contract Value ($1,000s)', color: '#86868b' },
+            ticks: { color: '#86868b', callback: v => '$' + (v / 1000).toLocaleString() },
             grid: { color: '#2c2c2e' }
           }
         }
