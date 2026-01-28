@@ -1,4 +1,4 @@
-# Flux Box Pricing Calculator
+# Flux Mobile SRS Bridge Pricing Calculator
 
 Two-part pricing structure for coach manufacturer deals: Year 1 (Sales) + Year 2+ (Service).
 

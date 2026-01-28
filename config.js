@@ -1,5 +1,5 @@
 /**
- * Flux Box Pricing Configuration
+ * Flux Mobile SRS Bridge Pricing Configuration
  *
  * Edit these values to adjust pricing assumptions.
  * All prices and costs are in USD.

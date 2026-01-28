@@ -1,5 +1,5 @@
 /**
- * Flux Box Pricing Model
+ * Flux Mobile SRS Bridge Pricing Model
  *
  * Three discount factors:
  * 1. Rate discount: Based on monthly order commitment (10-25/mo)
