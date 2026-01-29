@@ -608,14 +608,10 @@
       document.getElementById('volumeDiscValue').className = 'discount-value' + (discounts.volume > 0 ? ' active' : '');
       document.getElementById('contractDiscValue').className = 'discount-value' + (discounts.contract > 0 ? ' active' : '');
 
-      // Total Y2+ discount and price (relative to list base)
+      // Total Y2+ discount (formula-based to avoid rounding wobble)
       const y2Price = PRICING.year2Price(rate, duration, selectedContract, existingFleet);
       const y2List = PRICING.year2ListPrice(rate, duration, selectedContract, existingFleet);
-      const y2Shift = PRICING.year1ShiftPerYear(rate, duration, selectedContract);
-      const y2License = CONFIG.licensing.year2Plus || 0;
-      const y2BasePaid = Math.max(0, y2Price - y2License - y2Shift);
-      const totalY2Disc = y2List > 0 ? (1 - (y2BasePaid / y2List)) : 0;
-      document.getElementById('totalY2Discount').textContent = Math.round(totalY2Disc * 100) + '%';
+      document.getElementById('totalY2Discount').textContent = PRICING.formatPercent(discounts.totalY2);
       document.getElementById('y2PriceDisplay').textContent = PRICING.formatCurrency(y2Price);
       document.getElementById('y2ListDisplay').textContent = PRICING.formatCurrency(y2List);
       document.getElementById('totalUnitsDisplay').textContent = Math.round(discountUnits);
@@ -656,18 +652,12 @@
         const y1 = PRICING.year1Price(rate, duration, contractYrs, existingFleet);
         const y2 = PRICING.year2Price(rate, duration, contractYrs, existingFleet);
         const totalContract = y1 + (y2 * Math.max(0, contractYrs - 1));
-        const y1List = PRICING.year1ListPrice(rate, duration, contractYrs, existingFleet);
-        const y1Base = PRICING.year1BasePrice(rate, duration);
-        const y1Disc = y1List > 0 ? (1 - (y1Base / y1List)) : 0;
-        const y2List = PRICING.year2ListPrice(rate, duration, contractYrs, existingFleet);
+        const y1Disc = PRICING.year1TotalDiscount(rate, duration, contractYrs);
         const y2Price = PRICING.year2Price(rate, duration, contractYrs, existingFleet);
         const y2Raw = PRICING.year2PriceRaw(rate, duration, contractYrs, existingFleet);
         const y2RawRounded = PRICING.roundUp50(y2Raw);
         const y2Clamp = Math.max(0, y2Price - y2RawRounded);
-        const y2Shift = PRICING.year1ShiftPerYear(rate, duration, contractYrs);
-        const y2License = CONFIG.licensing.year2Plus || 0;
-        const y2BasePaid = Math.max(0, y2Price - y2License - y2Shift);
-        const y2Disc = contractYrs > 1 && y2List > 0 ? (1 - (y2BasePaid / y2List)) : 0;
+        const y2Disc = contractYrs > 1 ? PRICING.year2TotalDiscount(rate, duration, contractYrs) : 0;
 
         const row = document.createElement('tr');
         const isSelected = contractYrs === selectedContract;

@@ -1,2 +1,7 @@
 .claude/
 SRS_FTE_PRICING_MODEL.md
+data/
+node_modules/
+npm-debug.log
+credentials.txt
+.envrc
