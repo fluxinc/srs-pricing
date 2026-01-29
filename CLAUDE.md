@@ -89,11 +89,11 @@ Y2+ margin: 48% ($900 price, $470 cost)
 - `config.js` — pricing parameters and discount tiers
 - `pricing.js` — calculation functions
 - `index.html` — customer-facing calculator
-- `internal.html` — internal margin analysis
+- `margins.html` — internal margin analysis
 
 **Inputs:**
 - Monthly order rate slider (10-25 units/mo)
-- Commitment duration slider (1-10 years)
+- Commitment duration slider (1-5 years)
 - Contract length buttons (1/3/5/10 year)
 
 **Outputs:**
@@ -103,6 +103,18 @@ Y2+ margin: 48% ($900 price, $470 cost)
 - Discount breakdown (Volume + Contract)
 
 **Tech:** Vanilla JS, Chart.js, client-side only
+
+## Publishing (GitHub Pages — fluxinc)
+
+GitHub Pages is served from the `fluxinc/srs-pricing` repo. Publish by pushing the current branch to the `fluxinc` remote.
+
+```bash
+git push fluxinc master
+```
+
+Notes:
+- Pages serves from the repo root; `_config.yml` excludes internal docs.
+- Public page: `index.html`. Internal analysis: `margins.html`.
 
 ## External Tools
 
