@@ -15,19 +15,27 @@ const CONFIG = {
   },
 
   // ============================================================
-  // LABOR COSTS
+  // SOFTWARE LICENSING (REVENUE)
   // ============================================================
-  labor: {
-    hourlyRate: 35,                   // Billing rate per hour
-    fteSalary: 60000,                 // Annual FTE salary
-    fteHoursPerYear: 2000,            // Work hours per FTE (50 weeks × 40 hrs)
-    buildHoursPerUnit: 3,             // One-time setup per unit
-    supportHoursPerUnitYear: 8,       // Annual support per unit
-    coordinationHoursPerUnitYear: 4,  // Annual coordination overhead per unit
+  licensing: {
+    year1: 1900,                      // First-year license price (per unit)
+    year2Plus: 290,                   // Annual license price (per unit)
   },
 
   // ============================================================
-  // EFFICIENCY SCALING (support hours decrease over time)
+  // LABOR COSTS
+  // ============================================================
+  labor: {
+    hourlyRate: 75,                   // Billing rate per hour
+    fteSalary: 60000,                 // Annual FTE salary
+    fteHoursPerYear: 2000,            // Work hours per FTE (50 weeks × 40 hrs)
+    buildHoursPerUnit: 4,             // One-time setup per unit
+    supportHoursPerUnitYear: 8,       // Annual support per unit
+    coordinationHoursPerUnit: 4,      // One-time coordination per unit
+  },
+
+  // ============================================================
+  // TIME EFFICIENCY (support hours decrease over time)
   // ============================================================
   efficiency: {
     supportDecayRate: 0.90,       // 10% improvement per year
@@ -35,7 +43,16 @@ const CONFIG = {
   },
 
   // ============================================================
-  // FIXED OVERHEAD (regardless of install base)
+  // SCALE EFFICIENCY (support hours decrease with installed base)
+  // ============================================================
+  scaleEfficiency: {
+    scaleRefUnits: 100,           // Baseline installed base before scale savings
+    scaleSlope: 0.35,             // Higher = faster efficiency gains
+    scaleFloor: 0.60,             // Min factor applied to support hours
+  },
+
+  // ============================================================
+  // FIXED OVERHEAD (annual, regardless of install base)
   // ============================================================
   overhead: {
     devMaintenanceFTEs: 1,          // FTEs for system dev & maintenance
@@ -43,12 +60,18 @@ const CONFIG = {
   },
 
   // ============================================================
-  // BASE PRICES (no commitment - highest price point)
+  // PRICING CONTROLS
   // ============================================================
-  prices: {
-    baseline5yr: 9800,                // 5-year total with no commitment
-    year2: 1550,                      // Year 2+ base price per unit per year
-    // year1 derived: baseline5yr - (4 × year2)
+  pricing: {
+    year1FixedPrice: 2400,           // Fixed Year 1 base price (before discounts, excl. license)
+    year1ShiftFactor: 0.0,           // Share of Y1 base shifted into later years
+    margins: {
+      year2Plus: 0.20,               // Resale margin
+    },
+    overheadYear1Factor: 0.0,        // 0 = exclude overhead in Y1, 1 = full overhead
+    overheadCreditYears: 4,          // Cap Y1 surplus amortization across Y2+ years
+    year2BaselineYears: 10,          // Longest term used to set Y2+ minimum price
+    year2MinGap: 20,                 // Minimum Y2+ per-year gap between contract lengths
   },
 
   // ============================================================
@@ -66,6 +89,10 @@ const CONFIG = {
 
     // Year 1 gets reduced volume discount
     year1VolumeFactor: 0.5,           // Y1 gets 50% of the volume discount
+
+    // Blend between annual rate and total commitment for discount basis
+    // 0.0 = annual units only, 1.0 = total commitment (rate * years)
+    volumeDurationWeight: 0.25,
   },
 
   // ============================================================
@@ -73,9 +100,16 @@ const CONFIG = {
   // ============================================================
   contractDiscounts: {
     1: 0.00,                          // 1-year contract: no discount
-    3: 0.03,                          // 3-year contract: 3% off
-    5: 0.05,                          // 5-year contract: 5% off
-    10: 0.18,                         // 10-year contract: 18% off
+    3: 0.02,                          // 3-year contract: 2% off
+    5: 0.06,                          // 5-year contract: 6% off
+    10: 0.07,                         // 10-year contract: 7% off
+  },
+
+  // ============================================================
+  // INSTALLED BASE
+  // ============================================================
+  fleet: {
+    existingUnits: 0,                 // Already deployed units at start
   },
 };
 

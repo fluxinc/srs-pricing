@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mobile SRS Bridge Pricing - Internal</title>
+  <script src="config.js"></script>
+  <script src="pricing.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #222222;
+      color: #f5f5f7;
+      line-height: 1.4;
+      padding: 0.75rem;
+      font-size: 14px;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
+    .logo {
+      height: 32px;
+      width: auto;
+      order: 2;
+    }
+    h1 { font-size: 1.2rem; font-weight: 600; order: 1; flex: 1; }
+    h2 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; color: #86868b; }
+
+    .subtitle { color: #86868b; margin-bottom: 1rem; font-size: 0.8rem; }
+
+    .internal-badge {
+      display: inline-block;
+      background: #ff453a;
+      color: white;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .controls {
+      background: #1c1c1e;
+      border-radius: 10px;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      border: 1px solid #2c2c2e;
+    }
+
+    .control-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .control-row:last-child { margin-bottom: 0; }
+    .control-row.spaced { margin-top: 1rem; }
+
+    label { display: block; font-weight: 500; margin-bottom: 0.35rem; font-size: 0.75rem; }
+    .commitment-value { color: #e84200; font-weight: 600; }
+
+    .slider-container { display: flex; align-items: center; gap: 0.5rem; }
+
+    input[type="range"] {
+      flex: 1;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #3a3a3c;
+      border-radius: 4px;
+      outline: none;
+      min-width: 0;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: #e84200;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: #e84200;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+    }
+
+    .slider-value { font-size: 0.95rem; font-weight: 600; min-width: 60px; text-align: right; white-space: nowrap; }
+
+    .grid { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
+    .stack { display: grid; gap: 0.75rem; }
+    .stack .table-container { margin-bottom: 0; }
+    .pricing-grid { align-items: start; }
+
+    @media (max-width: 640px) {
+      .control-row { grid-template-columns: 1fr; gap: 1rem; }
+    }
+
+    .panel {
+      background: #1c1c1e;
+      border-radius: 10px;
+      padding: 0.75rem;
+      border: 1px solid #2c2c2e;
+      position: relative;
+    }
+
+    .panel-grid { display: grid; gap: 0.6rem; }
+    .panel-grid .table-container { margin-bottom: 0; }
+
+    @media (min-width: 800px) {
+      .panel-grid.two-col { grid-template-columns: 1fr 1fr; }
+    }
+
+    .panel.is-panel-pinned {
+      border-color: #e84200;
+      box-shadow: 0 0 0 1px rgba(232, 66, 0, 0.3);
+    }
+
+    .panel-pin {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      background: #2c2c2e;
+      border: 1px solid #3a3a3c;
+      color: #f5f5f7;
+      padding: 0.2rem 0.45rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.65rem;
+    }
+
+    .panel-pin.active {
+      background: #e84200;
+      border-color: #e84200;
+      font-weight: 600;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card {
+      background: #1c1c1e;
+      border-radius: 10px;
+      padding: 0.6rem;
+      border: 1px solid #2c2c2e;
+    }
+
+    .card-label { font-size: 0.65rem; color: #86868b; margin-bottom: 0.2rem; }
+    .card-value { font-size: 1rem; font-weight: 600; }
+    .card-value.good { color: #e84200; }
+    .card-value.warning { color: #ff9f0a; }
+    .card-value.bad { color: #ff453a; }
+
+    .cost-breakdown { margin-top: 0.5rem; }
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #2c2c2e;
+      font-size: 0.75rem;
+      gap: 1rem;
+    }
+    .cost-row span:first-child { flex: 1; }
+    .cost-row span:last-child { white-space: nowrap; }
+    .cost-row:last-child { border-bottom: none; }
+    .cost-row.total { font-weight: 600; border-top: 2px solid #3a3a3c; margin-top: 0.4rem; padding-top: 0.5rem; }
+
+    .table-container {
+      background: #1c1c1e;
+      border-radius: 10px;
+      padding: 0.75rem;
+      border: 1px solid #2c2c2e;
+      overflow-x: auto;
+      margin-bottom: 0.75rem;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .table-title { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.8rem; }
+
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    th, td { padding: 0.35rem 0.35rem; text-align: right; border-bottom: 1px solid #2c2c2e; font-size: 0.7rem; }
+    th { font-weight: 600; color: #86868b; white-space: nowrap; }
+    th:first-child, td:first-child { text-align: left; }
+    tr:last-child td { border-bottom: none; }
+    .highlight { background: #1a3a1a; }
+
+    .good { color: #e84200; }
+    .warning { color: #ff9f0a; }
+    .bad { color: #ff453a; }
+
+    .footer { margin-top: 1.5rem; text-align: center; color: #86868b; font-size: 0.75rem; }
+
+    code { background: #2c2c2e; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
+    .faint { color: #6f6f73; font-weight: 500; }
+
+    .contract-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .contract-btn {
+      background: #2c2c2e;
+      border: 1px solid #3a3a3c;
+      color: #f5f5f7;
+      padding: 0.35rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+      flex: 1;
+      min-width: 60px;
+      text-align: center;
+    }
+    .contract-btn:hover { background: #3a3a3c; }
+    .contract-btn.active {
+      background: #e84200;
+      border-color: #e84200;
+      font-weight: 600;
+    }
+
+    .config-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 0.6rem 0.8rem;
+    }
+
+    .config-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 0.25rem 0.6rem;
+    }
+
+    .config-item.is-disconnected { display: none; }
+
+    .pinned-bar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: #1c1c1e;
+      border: 1px solid #2c2c2e;
+      border-radius: 10px;
+      padding: 0.6rem;
+      margin: 0.5rem 0 0.75rem;
+    }
+
+    .pinned-bar.hidden { display: none; }
+
+    .pinned-title {
+      font-size: 0.7rem;
+      color: #86868b;
+      margin-bottom: 0.4rem;
+    }
+
+    .pinned-section.hidden { display: none; }
+
+    .pinned-items {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .pinned-item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 0.3rem 0.5rem;
+      align-items: center;
+      padding: 0.4rem 0.5rem;
+      border-radius: 8px;
+      border: 1px solid #2c2c2e;
+      background: #121213;
+    }
+
+    .pinned-label { font-size: 0.65rem; color: #86868b; }
+
+    .pinned-item input[type="range"] { width: 100%; }
+
+    .pin-remove {
+      background: #2c2c2e;
+      border: 1px solid #3a3a3c;
+      color: #f5f5f7;
+      padding: 0.15rem 0.4rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.65rem;
+    }
+
+    .pin-hint {
+      font-size: 0.7rem;
+      color: #86868b;
+      margin: 0.25rem 0 0.75rem;
+    }
+
+    .pinned-panels {
+      display: grid;
+      gap: 0.6rem;
+      margin-top: 0.6rem;
+    }
+
+    .panel-placeholder {
+      border: 1px dashed #2c2c2e;
+      border-radius: 10px;
+      padding: 0.5rem;
+      color: #86868b;
+      font-size: 0.7rem;
+      background: #1c1c1e;
+    }
+
+    .config-item label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #f5f5f7;
+      display: block;
+    }
+
+    .config-help {
+      font-size: 0.65rem;
+      color: #86868b;
+      line-height: 1.35;
+      grid-column: 1 / -1;
+    }
+
+    .config-input {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      justify-content: flex-end;
+    }
+
+    .config-input input[type="range"] {
+      width: 140px;
+    }
+
+    .config-input input[type="number"] {
+      width: 110px;
+      padding: 0.25rem 0.4rem;
+      border-radius: 6px;
+      border: 1px solid #2c2c2e;
+      background: #121213;
+      color: #f5f5f7;
+      font-size: 0.75rem;
+    }
+
+    .config-table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 0;
+    }
+
+    .config-table th,
+    .config-table td {
+      padding: 0.35rem 0.45rem;
+      border-bottom: 1px solid #2c2c2e;
+      font-size: 0.75rem;
+      text-align: left;
+    }
+
+    .config-table input[type="number"] {
+      width: 90px;
+      min-width: 60px;
+      padding: 0.2rem 0.35rem;
+      border-radius: 6px;
+      border: 1px solid #2c2c2e;
+      background: #121213;
+      color: #f5f5f7;
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 400px) {
+      .contract-buttons { gap: 0.4rem; }
+      .contract-btn { padding: 0.3rem 0.5rem; font-size: 0.7rem; min-width: 50px; }
+      .config-list { grid-template-columns: 1fr; }
+      .config-input input[type="number"] { width: 100%; }
+      .config-input input[type="range"] { width: 100%; }
+    }
+
+    /* Desktop breakpoint - restore larger sizes */
+    @media (min-width: 641px) {
+      body { padding: 1.5rem; font-size: 15px; }
+      .logo { height: 36px; }
+      h1 { font-size: 1.6rem; }
+      h2 { font-size: 1.1rem; margin-bottom: 0.6rem; }
+      .subtitle { margin-bottom: 1.25rem; font-size: 0.85rem; }
+      .internal-badge { padding: 0.2rem 0.6rem; font-size: 0.7rem; margin-left: 0.75rem; }
+      .controls { padding: 1rem; margin-bottom: 1rem; }
+      label { font-size: 0.8rem; }
+      .slider-value { font-size: 1rem; min-width: 80px; }
+      .cards { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.8rem; margin-bottom: 1rem; }
+      .card { padding: 0.8rem; }
+      .card-label { font-size: 0.7rem; }
+      .card-value { font-size: 1.1rem; }
+      .panel { padding: 1rem; }
+      .cost-breakdown { margin-top: 0.6rem; }
+      .cost-row { padding: 0.35rem 0; font-size: 0.85rem; }
+      .cost-row.total { padding-top: 0.6rem; }
+      .table-container { padding: 1rem; margin-bottom: 1rem; }
+      .table-title { margin-bottom: 0.6rem; font-size: 0.9rem; }
+      th, td { padding: 0.4rem 0.5rem; font-size: 0.8rem; }
+      .footer { margin-top: 1.5rem; font-size: 0.8rem; }
+      .contract-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+    }
+
+    /* Tablet/Desktop grid layouts */
+    @media (min-width: 800px) {
+      .grid { grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+      .control-row { gap: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="logo.png" alt="Flux" class="logo">
+      <h1>Flux Mobile SRS Bridge Pricing <span class="internal-badge">INTERNAL</span></h1>
+    </div>
+    <p class="subtitle">Cost breakdown, margins, and profitability analysis (2-layer discount model)</p>
+    <div class="pin-hint">Tip: Alt+Click any input or panel to pin it while you edit. Panels also have a Pin button.</div>
+
+    <div id="pinnedBar" class="pinned-bar hidden">
+      <div id="pinnedInputsSection" class="pinned-section hidden">
+        <div class="pinned-title">Pinned Inputs</div>
+        <div id="pinnedItems" class="pinned-items"></div>
+      </div>
+      <div id="pinnedPanelsSection" class="pinned-section hidden">
+        <div class="pinned-title">Pinned Panels</div>
+        <div id="pinnedPanels" class="pinned-panels"></div>
+      </div>
+    </div>
+
+    <div class="controls panel">
+      <div class="control-row">
+        <div>
+          <label>Monthly Order Rate</label>
+          <div class="slider-container">
+            <input type="range" id="rateSlider" min="10" max="25" step="1" value="10" aria-label="Monthly order rate">
+            <span class="slider-value"><span id="rateValue">10</span>/mo</span>
+          </div>
+        </div>
+        <div>
+          <label>Commitment Duration</label>
+          <div class="slider-container">
+            <input type="range" id="durationSlider" min="1" max="5" step="1" value="4" aria-label="Commitment duration">
+            <span class="slider-value"><span id="durationValue">4</span> yr</span>
+          </div>
+        </div>
+      </div>
+      <div class="control-row spaced">
+        <div>
+          <label>Existing Fleet (installed units)</label>
+          <div class="slider-container">
+            <input type="range" id="fleetSlider" min="0" max="1000" step="50" value="0" aria-label="Existing fleet size">
+            <span class="slider-value"><span id="fleetValue">0</span> units</span>
+          </div>
+        </div>
+        <div>
+          <label>Contract Package</label>
+          <div class="contract-buttons" id="contractButtons"></div>
+        </div>
+      </div>
+      <div class="control-row spaced">
+        <div>
+          <label>Total Commitment (actual): <span id="totalCommitment" class="commitment-value">480 units</span></label>
+          <div class="config-help">Discount basis (blended): <span id="discountCommitment">480 units</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Pricing & Overhead</h2>
+        <div class="config-list">
+          <div class="config-item">
+            <label>Year 1 Base Price</label>
+            <div class="config-input">
+              <input type="number" min="0" step="50" data-path="pricing.year1FixedPrice">
+            </div>
+            <div class="config-help">Fixed Year 1 base price before volume discount (license added separately).</div>
+          </div>
+          <div class="config-item">
+            <label>Y1 Shift to Later Years <span id="y1ShiftValue">0%</span></label>
+            <div class="config-input">
+              <input type="range" min="0" max="100" step="5" value="0"
+                     data-path="pricing.year1ShiftFactor" data-scale="0.01" data-display="y1ShiftValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Moves a share of the Year 1 base price into Years 2+ (spread evenly).</div>
+          </div>
+          <div class="config-item">
+            <label>Year 2+ Margin <span id="marginY2Value">35%</span></label>
+            <div class="config-input">
+              <input type="range" id="marginY2Slider" min="0" max="80" step="1" value="35"
+                     data-path="pricing.margins.year2Plus" data-scale="0.01" data-display="marginY2Value" data-display-format="percent">
+            </div>
+            <div class="config-help">Target margin applied to Year 2+ list price before discounts.</div>
+          </div>
+          <div class="config-item">
+            <label>Y2+ Baseline Term (years)</label>
+            <div class="config-input">
+              <input type="number" min="2" max="20" step="1" data-path="pricing.year2BaselineYears" data-type="int">
+            </div>
+            <div class="config-help">Longest term used to set the minimum Year 2+ price.</div>
+          </div>
+          <div class="config-item">
+            <label>Y2+ Min Gap per Year ($)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="10" data-path="pricing.year2MinGap">
+            </div>
+            <div class="config-help">Minimum per-year price gap between 10-year, 5-year, and 3-year.</div>
+          </div>
+          <div class="config-item">
+            <label>Year 1 Overhead Factor <span id="overheadFactorValue">0%</span></label>
+            <div class="config-input">
+              <input type="range" id="overheadFactorSlider" min="0" max="100" step="5" value="0"
+                     data-path="pricing.overheadYear1Factor" data-scale="0.01" data-display="overheadFactorValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Portion of annual overhead included in Year 1 cost (0% = excluded).</div>
+          </div>
+          <div class="config-item">
+            <label>Dev/Maintenance FTEs</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.1" data-path="overhead.devMaintenanceFTEs">
+            </div>
+            <div class="config-help">Annual overhead headcount allocated across the installed base.</div>
+          </div>
+          <div class="config-item">
+            <label>Additional Annual Overhead ($)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="100" data-path="overhead.additionalAnnualCost">
+            </div>
+            <div class="config-help">Fixed annual overhead not captured in FTE salaries.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Labor & Licensing</h2>
+        <div class="config-list">
+          <div class="config-item">
+            <label>Hourly Rate ($/hr)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="1" data-path="labor.hourlyRate">
+            </div>
+            <div class="config-help">Applied to build, support, and coordination hours.</div>
+          </div>
+          <div class="config-item">
+            <label>Build Hours (per unit)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.5" data-path="labor.buildHoursPerUnit">
+            </div>
+            <div class="config-help">One-time build effort for each unit.</div>
+          </div>
+          <div class="config-item">
+            <label>Support Hours (per unit/year)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.5" data-path="labor.supportHoursPerUnitYear">
+            </div>
+            <div class="config-help">Baseline annual support hours before efficiency scaling.</div>
+          </div>
+          <div class="config-item">
+            <label>Coordination Hours (per unit)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.5" data-path="labor.coordinationHoursPerUnit">
+            </div>
+            <div class="config-help">One-time coordination effort for each unit.</div>
+          </div>
+          <div class="config-item">
+            <label>License Price (Year 1)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="10" data-path="licensing.year1">
+            </div>
+            <div class="config-help">Per-unit license revenue added on top of discounted pricing.</div>
+          </div>
+          <div class="config-item">
+            <label>License Price (Year 2+)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="10" data-path="licensing.year2Plus">
+            </div>
+            <div class="config-help">Annual per-unit license revenue added on top of discounted pricing.</div>
+          </div>
+          <div class="config-item">
+            <label>FTE Salary ($/yr)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="1000" data-path="labor.fteSalary">
+            </div>
+            <div class="config-help">Used for overhead cost modeling.</div>
+          </div>
+          <div class="config-item is-disconnected">
+            <label>FTE Hours (per year)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="50" data-path="labor.fteHoursPerYear" disabled>
+            </div>
+            <div class="config-help">Used to estimate support FTE needs.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Hardware & Scale</h2>
+        <div class="config-list">
+          <div class="config-item">
+            <label>Hardware Cost (per unit)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="50" data-path="hardware.fluxBox">
+            </div>
+            <div class="config-help">Hardware bill of materials per unit.</div>
+          </div>
+          <div class="config-item">
+            <label>Replacement Cycle (years)</label>
+            <div class="config-input">
+              <input type="number" min="1" step="1" data-path="hardware.replacementCycleYears" data-type="int">
+            </div>
+            <div class="config-help">Hardware reserve = cost / replacement cycle.</div>
+          </div>
+          <div class="config-item">
+            <label>Scale Reference (units)</label>
+            <div class="config-input">
+              <input type="number" min="1" step="10" data-path="scaleEfficiency.scaleRefUnits" data-type="int">
+            </div>
+            <div class="config-help">Installed-base size where scale savings begin.</div>
+          </div>
+          <div class="config-item">
+            <label>Scale Slope</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.05" data-path="scaleEfficiency.scaleSlope">
+            </div>
+            <div class="config-help">Higher values mean faster efficiency gains with scale.</div>
+          </div>
+          <div class="config-item">
+            <label>Scale Floor <span id="scaleFloorValue">60%</span></label>
+            <div class="config-input">
+              <input type="range" min="20" max="100" step="1" value="60"
+                     data-path="scaleEfficiency.scaleFloor" data-scale="0.01" data-display="scaleFloorValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Minimum support-hours factor at very large scale.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Time Efficiency</h2>
+        <div class="config-list">
+          <div class="config-item">
+            <label>Support Decay Rate <span id="supportDecayValue">90%</span></label>
+            <div class="config-input">
+              <input type="range" min="70" max="100" step="1" value="90"
+                     data-path="efficiency.supportDecayRate" data-scale="0.01" data-display="supportDecayValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Year-over-year efficiency improvement (1.0 = no improvement).</div>
+          </div>
+          <div class="config-item">
+            <label>Support Floor <span id="supportFloorValue">63%</span></label>
+            <div class="config-input">
+              <input type="range" min="20" max="100" step="1" value="63"
+                     data-path="efficiency.supportFloor" data-scale="0.01" data-display="supportFloorValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Minimum support-hours factor after decay.</div>
+          </div>
+          <div class="config-item">
+            <label>Year 1 Volume Discount Factor <span id="y1VolumeFactorValue">50%</span></label>
+            <div class="config-input">
+              <input type="range" min="0" max="100" step="5" value="50"
+                     data-path="discounts.year1VolumeFactor" data-scale="0.01" data-display="y1VolumeFactorValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Year 1 gets this portion of the volume discount.</div>
+          </div>
+          <div class="config-item">
+            <label>Volume Duration Weight <span id="volumeDurationWeightValue">25%</span></label>
+            <div class="config-input">
+              <input type="range" min="0" max="100" step="5" value="25"
+                     data-path="discounts.volumeDurationWeight" data-scale="0.01" data-display="volumeDurationWeightValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Blends annual rate vs total commitment for volume tiers (0% = rate-only).</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Discount Tiers</h2>
+      <div class="panel-grid two-col">
+        <div class="table-container">
+          <div class="table-title">Volume Discount Tiers (keep descending order)</div>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Tier Min Units</th>
+                <th>Discount (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="number" min="0" step="10" data-path="discounts.volumeTiers.0.minUnits" data-type="int"></td>
+                <td><input type="number" min="0" step="1" data-path="discounts.volumeTiers.0.discount" data-scale="0.01"></td>
+              </tr>
+              <tr>
+                <td><input type="number" min="0" step="10" data-path="discounts.volumeTiers.1.minUnits" data-type="int"></td>
+                <td><input type="number" min="0" step="1" data-path="discounts.volumeTiers.1.discount" data-scale="0.01"></td>
+              </tr>
+              <tr>
+                <td><input type="number" min="0" step="10" data-path="discounts.volumeTiers.2.minUnits" data-type="int"></td>
+                <td><input type="number" min="0" step="1" data-path="discounts.volumeTiers.2.discount" data-scale="0.01"></td>
+              </tr>
+              <tr>
+                <td><input type="number" min="0" step="10" data-path="discounts.volumeTiers.3.minUnits" data-type="int"></td>
+                <td><input type="number" min="0" step="1" data-path="discounts.volumeTiers.3.discount" data-scale="0.01"></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="config-help">Discount values are entered as percentages (e.g., 25 for 25%).</div>
+        </div>
+
+        <div class="table-container">
+          <div class="table-title">Contract Length Discounts</div>
+          <table class="config-table">
+            <thead>
+              <tr>
+                <th>Contract Years</th>
+                <th>Discount (%)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1 Year</td>
+                <td><input type="number" min="0" step="0.5" data-path="contractDiscounts.1" data-scale="0.01"></td>
+              </tr>
+              <tr>
+                <td>3 Years</td>
+                <td><input type="number" min="0" step="0.5" data-path="contractDiscounts.3" data-scale="0.01"></td>
+              </tr>
+              <tr>
+                <td>5 Years</td>
+                <td><input type="number" min="0" step="0.5" data-path="contractDiscounts.5" data-scale="0.01"></td>
+              </tr>
+              <tr>
+                <td>10 Years</td>
+                <td><input type="number" min="0" step="0.5" data-path="contractDiscounts.10" data-scale="0.01"></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="config-help">Discount values are entered as percentages (e.g., 18 for 18%).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Per-Unit Pricing (Customer + Profit)</div>
+      <table id="customerPricingTable">
+        <thead>
+          <tr>
+            <th>Part Number</th>
+            <th>Year 1</th>
+            <th>Year 2+ (per yr)</th>
+            <th>Total Price</th>
+            <th>Total Cost (term)</th>
+            <th>Profit / unit (term)</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Key Metrics</div>
+      <table id="metricsTable">
+        <thead>
+          <tr>
+            <th>Metric</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Year 1 Price</td><td id="y1Price">$3,500</td></tr>
+          <tr><td>Year 1 Cost</td><td id="y1Cost">$1,670</td></tr>
+          <tr><td>Year 1 Margin (realized)</td><td id="y1Margin">52%</td></tr>
+          <tr><td>Year 2+ Price</td><td id="y2Price">$1,250</td></tr>
+          <tr><td>Year 2+ Cost (avg)</td><td id="y2Cost">$670</td></tr>
+          <tr><td>Year 2+ Margin (realized)</td><td id="y2Margin">46%</td></tr>
+          <tr><td>Contract Margin (selected)</td><td id="contractMargin">46%</td></tr>
+          <tr><td>Overhead / Unit (avg)</td><td id="overheadPerUnit">$500</td></tr>
+          <tr><td>Year 2+ Cost (w/ overhead)</td><td id="y2CostEffective">$1,170</td></tr>
+          <tr><td>Year 2+ Margin (effective)</td><td id="y2MarginEffective">46%</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Year 1 Cost Breakdown</h2>
+        <div class="cost-breakdown" id="y1Breakdown"></div>
+      </div>
+      <div class="panel">
+        <h2>Year 2+ Cost Breakdown</h2>
+        <div class="cost-breakdown" id="y2Breakdown"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>2-Layer Discount Breakdown</h2>
+        <div class="cost-breakdown" id="discountBreakdown"></div>
+      </div>
+      <div class="panel">
+        <h2>Volume Tier Economics</h2>
+        <div class="cost-breakdown" id="volumeTierEconomics"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Config Summary</h2>
+        <div class="cost-breakdown" id="configSummary"></div>
+      </div>
+      <div class="panel">
+        <h2>Monthly Financial Impact</h2>
+        <div class="cost-breakdown" id="monthlyFinancials"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Annual Labor Budget</h2>
+        <div class="cost-breakdown" id="laborBudget"></div>
+      </div>
+      <div class="panel">
+        <h2>Support Efficiency Projection</h2>
+        <div class="cost-breakdown" id="efficiencyProjection"></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Commitment Summary</h2>
+        <div class="cost-breakdown" id="commitmentSummary"></div>
+      </div>
+      <div class="panel">
+        <h2>Profitability Analysis</h2>
+        <div class="cost-breakdown" id="profitabilityAnalysis"></div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Part Number Pricing Sheet (at current commitment level)</div>
+      <table id="partNumberTable">
+        <thead>
+          <tr>
+            <th>Part Number</th>
+            <th>Description</th>
+            <th>Year 1</th>
+            <th>Year 2+/yr</th>
+            <th>Total Contract</th>
+            <th>Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Commitment Timing Comparison (same total units, different timelines)</div>
+      <table id="timingComparisonTable">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>Total Units</th>
+            <th>Volume Disc</th>
+            <th>Y1 Price</th>
+            <th>Y2+ Price</th>
+            <th>Contract Total (5yr)</th>
+            <th>Note</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Volume Tier Margin Analysis</div>
+      <table id="volumeMarginTable">
+        <thead>
+          <tr>
+            <th>Commitment</th>
+            <th>Volume Disc</th>
+            <th>Y1 Price</th>
+            <th>Y1 Margin</th>
+            <th>Y2+ Price</th>
+            <th>Y2+ Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="table-container">
+      <div class="table-title">Margin by Commitment Level (with fleet discount)</div>
+      <table id="marginTable">
+        <thead>
+          <tr>
+            <th>Commitment</th>
+            <th>Total Y2 Discount</th>
+            <th>Y1 Price</th>
+            <th>Y1 Margin</th>
+            <th>Y2+ Price</th>
+            <th>Y2+ Margin</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="footer">
+      Edit <code>config.js</code> to adjust costs, margins, and discount settings.
+    </div>
+  </div>
+
+  <script>
+    const CONTRACT_YEARS = Object.keys(CONFIG.contractDiscounts)
+      .map(Number)
+      .filter(Number.isFinite)
+      .sort((a, b) => a - b);
+    let selectedContract = Math.max(...CONTRACT_YEARS); // Default to longest term
+    const PART_NUMBERS = CONTRACT_YEARS.map((years) => ({
+      partNum: `FX-SRS-${years}YR`,
+      desc: `${years}-Year Contract`,
+      years,
+    }));
+    const SARAH_TIERS = [
+      // Enterprise (500+)
+      { minUnits: 500, prices: { 1: 4500, 3: 5300, 5: 6250, 10: 9500 } },
+      // Scale (200–499)
+      { minUnits: 200, prices: { 1: 5200, 3: 6200, 5: 7250, 10: 11000 } },
+      // Growth (10–199)
+      { minUnits: 10, prices: { 1: 6100, 3: 7300, 5: 8500, 10: 13000 } },
+      // Pilot (<10)
+      { minUnits: 0, prices: { 1: 7000, 3: 8500, 5: 9800, 10: 15000 } },
+    ];
+    const TAB_ID = Math.random().toString(36).slice(2);
+    const stateChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('srs-state') : null;
+
+    function deepMerge(target, source) {
+      if (!source || typeof source !== 'object') return target;
+      Object.keys(source).forEach(key => {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+          if (!target[key]) target[key] = {};
+          deepMerge(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      });
+      return target;
+    }
+
+    function getByPath(obj, path) {
+      return path.split('.').reduce((acc, key) => (acc ? acc[key] : undefined), obj);
+    }
+
+    function setByPath(obj, path, value) {
+      const keys = path.split('.');
+      let current = obj;
+      for (let i = 0; i < keys.length - 1; i++) {
+        if (!current[keys[i]]) current[keys[i]] = {};
+        current = current[keys[i]];
+      }
+      current[keys[keys.length - 1]] = value;
+    }
+
+    function inputKey(input) {
+      if (input.dataset.pinKey) return input.dataset.pinKey;
+      if (input.dataset.path) return `path:${input.dataset.path}`;
+      if (input.id) return `id:${input.id}`;
+      return null;
+    }
+
+    let isSyncing = false;
+    function syncInputs(key, value, source) {
+      if (!key || isSyncing) return;
+      isSyncing = true;
+      document.querySelectorAll('input').forEach(inp => {
+        if (inp === source) return;
+        const k = inputKey(inp);
+        if (k === key) {
+          inp.value = value;
+        }
+      });
+      isSyncing = false;
+    }
+
+    function handleInputEvent(event) {
+      const input = event.target;
+      const key = inputKey(input);
+      if (key) syncInputs(key, input.value, input);
+      update();
+      if (input.dataset.path) {
+        scheduleConfigSave();
+      } else {
+        scheduleUiSave();
+      }
+    }
+
+    function bindInput(input) {
+      input.addEventListener('input', handleInputEvent);
+      input.addEventListener('change', handleInputEvent);
+    }
+
+    function bindAllInputs() {
+      document.querySelectorAll('input').forEach(bindInput);
+    }
+
+    function labelFromInput(input) {
+      const configItem = input.closest('.config-item');
+      if (configItem) {
+        const label = configItem.querySelector('label');
+        if (label) return label.textContent.trim();
+      }
+      const group = input.closest('.control-row');
+      if (group) {
+        const label = group.querySelector('label');
+        if (label) return label.textContent.trim();
+      }
+      if (input.dataset.path) return input.dataset.path;
+      if (input.id) return input.id;
+      return 'Pinned Input';
+    }
+
+    let panelIdCounter = 0;
+    const panelPlaceholders = new Map();
+
+    function ensurePanelId(panel) {
+      if (!panel.dataset.panelId) {
+        panelIdCounter += 1;
+        panel.dataset.panelId = String(panelIdCounter);
+      }
+      return panel.dataset.panelId;
+    }
+
+    function updatePanelPinButton(panel) {
+      const btn = panel.querySelector('.panel-pin');
+      if (!btn) return;
+      const pinned = panel.classList.contains('is-panel-pinned');
+      btn.textContent = pinned ? 'Unpin' : 'Pin';
+      btn.classList.toggle('active', pinned);
+    }
+
+    function pinPanel(panel) {
+      const id = ensurePanelId(panel);
+      if (panel.classList.contains('is-panel-pinned')) {
+        const placeholder = panelPlaceholders.get(id);
+        if (placeholder && placeholder.parentNode) {
+          placeholder.parentNode.replaceChild(panel, placeholder);
+        }
+        panelPlaceholders.delete(id);
+        panel.classList.remove('is-panel-pinned');
+        updatePanelPinButton(panel);
+        togglePinnedBar();
+        return;
+      }
+
+      const placeholder = document.createElement('div');
+      placeholder.className = 'panel-placeholder';
+      placeholder.dataset.panelId = id;
+      placeholder.textContent = 'Pinned above';
+      panel.parentNode.insertBefore(placeholder, panel);
+      panelPlaceholders.set(id, placeholder);
+
+      document.getElementById('pinnedPanels').appendChild(panel);
+      panel.classList.add('is-panel-pinned');
+      updatePanelPinButton(panel);
+      togglePinnedBar();
+    }
+
+    function addPanelPins() {
+      document.querySelectorAll('.panel').forEach(panel => {
+        if (panel.querySelector('.panel-pin')) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'panel-pin';
+        btn.textContent = 'Pin';
+        btn.addEventListener('click', (event) => {
+          event.stopPropagation();
+          pinPanel(panel);
+        });
+        panel.appendChild(btn);
+      });
+    }
+
+    function pinInput(input) {
+      const key = inputKey(input);
+      if (!key) return;
+      const existing = document.querySelector(`.pinned-item[data-key="${key}"]`);
+      if (existing) {
+        existing.remove();
+        togglePinnedBar();
+        return;
+      }
+
+      const pinnedItems = document.getElementById('pinnedItems');
+      const item = document.createElement('div');
+      item.className = 'pinned-item';
+      item.dataset.key = key;
+
+      const label = document.createElement('div');
+      label.className = 'pinned-label';
+      label.textContent = labelFromInput(input);
+
+      const clone = input.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.dataset.pinKey = key;
+      clone.style.width = '100%';
+
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'pin-remove';
+      remove.textContent = 'Unpin';
+      remove.addEventListener('click', () => {
+        item.remove();
+        togglePinnedBar();
+      });
+
+      item.appendChild(label);
+      item.appendChild(remove);
+      item.appendChild(clone);
+      pinnedItems.appendChild(item);
+      bindInput(clone);
+      togglePinnedBar();
+    }
+
+    function togglePinnedBar() {
+      const bar = document.getElementById('pinnedBar');
+      const inputSection = document.getElementById('pinnedInputsSection');
+      const panelSection = document.getElementById('pinnedPanelsSection');
+      const hasInputs = document.querySelectorAll('.pinned-item').length > 0;
+      const hasPanels = document.querySelectorAll('.panel.is-panel-pinned').length > 0;
+      inputSection.classList.toggle('hidden', !hasInputs);
+      panelSection.classList.toggle('hidden', !hasPanels);
+      bar.classList.toggle('hidden', !(hasInputs || hasPanels));
+    }
+
+    function enablePinning() {
+      document.addEventListener('click', (event) => {
+        if (!event.altKey) return;
+        const input = event.target.closest('input');
+        if (input) {
+          event.preventDefault();
+          event.stopPropagation();
+          pinInput(input);
+          return;
+        }
+        const panel = event.target.closest('.panel');
+        if (panel) {
+          event.preventDefault();
+          event.stopPropagation();
+          pinPanel(panel);
+        }
+      });
+    }
+
+    function buildTierRanges() {
+      const mins = CONFIG.discounts.volumeTiers.map(t => t.minUnits).concat([0]);
+      const uniq = Array.from(new Set(mins)).sort((a, b) => a - b);
+      return uniq.map((min, idx) => {
+        const next = uniq[idx + 1];
+        const max = Number.isFinite(next) ? next - 1 : Infinity;
+        const label = Number.isFinite(next) ? `${min}-${max} units` : `${min}+ units`;
+        return { min, max, label };
+      });
+    }
+
+    function renderContractButtons() {
+      const container = document.getElementById('contractButtons');
+      container.innerHTML = '';
+      CONTRACT_YEARS.forEach((years) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'contract-btn';
+        btn.dataset.years = years;
+        btn.textContent = `${years}-Year`;
+        container.appendChild(btn);
+      });
+    }
+
+    function setInputClamped(input, value) {
+      if (!input || !Number.isFinite(value)) return;
+      const min = parseFloat(input.min);
+      const max = parseFloat(input.max);
+      let next = value;
+      if (Number.isFinite(min)) next = Math.max(min, next);
+      if (Number.isFinite(max)) next = Math.min(max, next);
+      input.value = next;
+    }
+
+    function applyState(state) {
+      if (!state) return;
+      if (state.config) {
+        deepMerge(CONFIG, state.config);
+        setInputsFromConfig();
+      }
+      if (state.ui) {
+        setInputClamped(document.getElementById('rateSlider'), state.ui.rate);
+        setInputClamped(document.getElementById('durationSlider'), state.ui.duration);
+        setInputClamped(document.getElementById('fleetSlider'), state.ui.existingFleet);
+        if (Number.isFinite(state.ui.selectedContract)) selectedContract = state.ui.selectedContract;
+      }
+      if (!CONTRACT_YEARS.includes(selectedContract)) {
+        selectedContract = Math.max(...CONTRACT_YEARS);
+      }
+      setActiveContract(selectedContract);
+      const rateInput = document.getElementById('rateSlider');
+      const durationInput = document.getElementById('durationSlider');
+      const fleetInput = document.getElementById('fleetSlider');
+      const rateKey = inputKey(rateInput);
+      const durationKey = inputKey(durationInput);
+      const fleetKey = inputKey(fleetInput);
+      if (rateKey) syncInputs(rateKey, rateInput.value, rateInput);
+      if (durationKey) syncInputs(durationKey, durationInput.value, durationInput);
+      if (fleetKey) syncInputs(fleetKey, fleetInput.value, fleetInput);
+      update();
+    }
+
+    function durationForDiscountUnits(monthlyRate, discountUnits) {
+      const annualUnits = PRICING.annualUnits(monthlyRate);
+      const weight = CONFIG.discounts.volumeDurationWeight ?? 1;
+      const w = Math.max(0, Math.min(1, weight));
+      if (annualUnits <= 0) return 1;
+      if (w <= 0) return 1;
+      const base = annualUnits * (1 - w);
+      const years = (discountUnits - base) / (annualUnits * w);
+      return Math.max(1, Number.isFinite(years) ? years : 1);
+    }
+
+    function applyInputsToConfig() {
+      document.querySelectorAll('[data-path]').forEach(input => {
+        const raw = parseFloat(input.value);
+        if (!Number.isFinite(raw)) return;
+        const scale = parseFloat(input.dataset.scale || '1');
+        let value = raw * scale;
+        if (input.dataset.type === 'int') value = Math.round(value);
+        setByPath(CONFIG, input.dataset.path, value);
+
+        const displayId = input.dataset.display;
+        if (displayId) {
+          const displayEl = document.getElementById(displayId);
+          if (displayEl) {
+            if (input.dataset.displayFormat === 'percent') {
+              displayEl.textContent = Math.round(raw) + '%';
+            } else {
+              displayEl.textContent = raw;
+            }
+          }
+        }
+      });
+    }
+
+    function setInputsFromConfig() {
+      document.querySelectorAll('[data-path]').forEach(input => {
+        const value = getByPath(CONFIG, input.dataset.path);
+        if (!Number.isFinite(value)) return;
+        const scale = parseFloat(input.dataset.scale || '1');
+        const raw = value / scale;
+        input.value = raw;
+        const displayId = input.dataset.display;
+        if (displayId) {
+          const displayEl = document.getElementById(displayId);
+          if (displayEl) {
+            if (input.dataset.displayFormat === 'percent') {
+              displayEl.textContent = Math.round(raw) + '%';
+            } else {
+              displayEl.textContent = raw;
+            }
+          }
+        }
+      });
+    }
+
+    function getConfigOverrides() {
+      return JSON.parse(JSON.stringify(CONFIG));
+    }
+
+    function getUiState() {
+      return {
+        rate: parseInt(document.getElementById('rateSlider').value),
+        duration: parseInt(document.getElementById('durationSlider').value),
+        selectedContract: selectedContract,
+        existingFleet: parseInt(document.getElementById('fleetSlider').value),
+      };
+    }
+
+    function loadUiState() {
+      try {
+        const raw = localStorage.getItem('srs-ui-internal');
+        return raw ? JSON.parse(raw) : null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function saveUiState() {
+      try {
+        localStorage.setItem('srs-ui-internal', JSON.stringify(getUiState()));
+      } catch (err) {
+        // ignore storage failures
+      }
+    }
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config', { cache: 'no-store' });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        console.warn('Failed to load config', err);
+        return null;
+      }
+    }
+
+    let configSaveTimer = null;
+    let uiSaveTimer = null;
+    function scheduleConfigSave() {
+      clearTimeout(configSaveTimer);
+      configSaveTimer = setTimeout(saveConfig, 400);
+    }
+
+    function scheduleUiSave() {
+      clearTimeout(uiSaveTimer);
+      uiSaveTimer = setTimeout(saveUiState, 200);
+    }
+
+    async function saveConfig() {
+      const payload = getConfigOverrides();
+      try {
+        await fetch('/api/config', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        broadcastConfigUpdate();
+      } catch (err) {
+        console.warn('Failed to save config', err);
+      }
+    }
+
+    function broadcastConfigUpdate() {
+      const message = { type: 'config-updated', source: TAB_ID, ts: Date.now() };
+      if (stateChannel) {
+        stateChannel.postMessage(message);
+        return;
+      }
+      try {
+        localStorage.setItem('srs-state-ping', JSON.stringify(message));
+      } catch (err) {
+        // ignore storage failures
+      }
+    }
+
+    function setActiveContract(years) {
+      selectedContract = years;
+      document.querySelectorAll('.contract-btn').forEach(b => b.classList.remove('active'));
+      const active = document.querySelector(`.contract-btn[data-years="${years}"]`);
+      if (active) active.classList.add('active');
+    }
+
+    function marginClass(margin) {
+      if (margin >= 0.40) return 'good';
+      if (margin >= 0.30) return 'warning';
+      return 'bad';
+    }
+
+    function targetBandClass(margin) {
+      if (margin >= 0.40 && margin <= 0.50) return 'good';
+      if ((margin >= 0.35 && margin < 0.40) || (margin > 0.50 && margin <= 0.55)) return 'warning';
+      return 'bad';
+    }
+
+    function formatCurrencyRaw(value) {
+      if (!Number.isFinite(value)) return '-';
+      return '$' + Math.round(value).toLocaleString();
+    }
+
+    function getSarahPrice(totalUnits, contractYears) {
+      for (const tier of SARAH_TIERS) {
+        if (totalUnits >= tier.minUnits) {
+          return tier.prices[contractYears] || null;
+        }
+      }
+      return null;
+    }
+
+    function update() {
+      applyInputsToConfig();
+      const rate = parseInt(document.getElementById('rateSlider').value);
+      const duration = parseInt(document.getElementById('durationSlider').value);
+      const existingFleet = parseInt(document.getElementById('fleetSlider').value);
+      const contractYrs = selectedContract;
+
+      // Total commitment = rate × 12 × duration (actual)
+      const totalUnits = PRICING.totalCommitment(rate, duration);
+      const discountUnits = PRICING.discountBasisUnits(rate, duration);
+
+      document.getElementById('rateValue').textContent = rate;
+      document.getElementById('durationValue').textContent = duration;
+      document.getElementById('fleetValue').textContent = existingFleet;
+      document.getElementById('totalCommitment').textContent = totalUnits + ' units';
+      document.getElementById('discountCommitment').textContent = Math.round(discountUnits) + ' units';
+
+      // Prices and margins (using selected contract)
+      const y1Price = PRICING.year1Price(rate, duration, contractYrs, existingFleet);
+      const y1Cost = PRICING.year1Cost(rate, duration, existingFleet);
+      const y1Margin = PRICING.year1Margin(rate, duration, contractYrs, existingFleet);
+
+      const y2Price = PRICING.year2Price(rate, duration, contractYrs, existingFleet);
+      const y2Cost = PRICING.year2CostBlended(contractYrs, rate, duration, existingFleet);
+      const y2Margin = PRICING.year2Margin(rate, duration, contractYrs, existingFleet);
+      const contractMargin = PRICING.contractMargin(rate, duration, contractYrs, existingFleet);
+
+      document.getElementById('y1Price').textContent = PRICING.formatCurrency(y1Price);
+      document.getElementById('y1Cost').textContent = '$' + Math.ceil(y1Cost).toLocaleString();
+      document.getElementById('y1Margin').textContent = PRICING.formatPercent(y1Margin);
+      document.getElementById('y1Margin').className = marginClass(y1Margin);
+
+      document.getElementById('y2Price').textContent = PRICING.formatCurrency(y2Price);
+      document.getElementById('y2Cost').textContent = '$' + Math.ceil(y2Cost).toLocaleString();
+      document.getElementById('y2Margin').textContent = PRICING.formatPercent(y2Margin);
+      document.getElementById('y2Margin').className = marginClass(y2Margin);
+      document.getElementById('contractMargin').textContent = PRICING.formatPercent(contractMargin);
+      document.getElementById('contractMargin').className = targetBandClass(contractMargin);
+
+      // Effective margins with overhead (based on total units)
+      const overheadPerUnit = PRICING.overheadBlended(contractYrs, rate, duration, existingFleet);
+      const y2CostEffective = y2Cost + overheadPerUnit;
+      const y2MarginEffective = PRICING.year2MarginWithOverhead(rate, duration, contractYrs, existingFleet);
+
+      document.getElementById('overheadPerUnit').textContent = '$' + Math.ceil(overheadPerUnit).toLocaleString();
+      document.getElementById('y2CostEffective').textContent = '$' + Math.ceil(y2CostEffective).toLocaleString();
+      document.getElementById('y2MarginEffective').textContent = PRICING.formatPercent(y2MarginEffective);
+      document.getElementById('y2MarginEffective').className = marginClass(y2MarginEffective);
+
+      // Cost breakdowns
+      const C = CONFIG;
+      const coordCost = C.labor.coordinationHoursPerUnit * C.labor.hourlyRate;
+      const supportHoursY1 = PRICING.supportHoursForYear(1, rate, duration, existingFleet);
+      const supportCostY1 = supportHoursY1 * C.labor.hourlyRate;
+      const overheadY1 = PRICING.overheadPerUnitForYear(1, rate, duration, existingFleet) * C.pricing.overheadYear1Factor;
+      document.getElementById('y1Breakdown').innerHTML = `
+        <div class="cost-row"><span>Hardware</span><span>$${C.hardware.fluxBox}</span></div>
+        <div class="cost-row"><span>Build Labor (${C.labor.buildHoursPerUnit}hrs x $${C.labor.hourlyRate})</span><span>$${C.labor.buildHoursPerUnit * C.labor.hourlyRate}</span></div>
+        <div class="cost-row"><span>Support (${supportHoursY1.toFixed(1)}hrs x $${C.labor.hourlyRate})</span><span>$${Math.ceil(supportCostY1)}</span></div>
+        <div class="cost-row"><span>Coordination (${C.labor.coordinationHoursPerUnit}hrs x $${C.labor.hourlyRate})</span><span>$${coordCost}</span></div>
+        <div class="cost-row"><span>Overhead (Y1 factor ${C.pricing.overheadYear1Factor})</span><span>$${Math.ceil(overheadY1)}</span></div>
+        <div class="cost-row total"><span>Total Cost + Overhead</span><span>$${Math.ceil(y1Cost + overheadY1)}</span></div>
+      `;
+
+      document.getElementById('y2Breakdown').innerHTML = `
+        <div class="cost-row"><span>Support (avg) ${PRICING.supportHoursForYear(2, rate, duration, existingFleet).toFixed(1)}hrs x $${C.labor.hourlyRate}</span><span>$${Math.ceil(PRICING.supportHoursForYear(2, rate, duration, existingFleet) * C.labor.hourlyRate)}</span></div>
+        <div class="cost-row"><span>Hardware Reserve ($${C.hardware.fluxBox} / ${C.hardware.replacementCycleYears}yr)</span><span>$${Math.ceil(PRICING.hardwareReserve)}</span></div>
+        <div class="cost-row"><span>Overhead (avg)</span><span>$${Math.ceil(PRICING.overheadBlended(contractYrs, rate, duration, existingFleet))}</span></div>
+        <div class="cost-row total"><span>Total Cost (avg)</span><span>$${Math.ceil(y2Cost + PRICING.overheadBlended(contractYrs, rate, duration, existingFleet))}</span></div>
+      `;
+
+      // 2-layer discount breakdown
+      const discounts = PRICING.getDiscountBreakdown(rate, duration, contractYrs, existingFleet);
+
+      document.getElementById('discountBreakdown').innerHTML = `
+        <div class="cost-row"><span>Total Commitment (actual)</span><span>${totalUnits} units</span></div>
+        <div class="cost-row"><span>Discount Basis (blended)</span><span>${Math.round(discountUnits)} units</span></div>
+        <div class="cost-row"><span>Commitment Duration</span><span>${duration} years</span></div>
+        <div class="cost-row"><span>List Price (Y1)</span><span>${PRICING.formatCurrency(discounts.listY1)}</span></div>
+        <div class="cost-row"><span>List Price (Y2+)</span><span>${PRICING.formatCurrency(discounts.listY2)}</span></div>
+        <div class="cost-row"><span>1. Volume Discount (full)</span><span>${PRICING.formatPercent(discounts.volume)}</span></div>
+        <div class="cost-row"><span>1. Volume Discount (Y1 @ 50%)</span><span>${PRICING.formatPercent(discounts.volumeY1)}</span></div>
+        <div class="cost-row"><span>2. Contract Discount (${contractYrs}yr, Y2+)</span><span>${PRICING.formatPercent(discounts.contract)}</span></div>
+        <div class="cost-row"><span>Overhead (Y1 factor)</span><span>$${Math.round(discounts.overheadY1)}/unit</span></div>
+        <div class="cost-row"><span>Overhead (Y2 avg)</span><span>$${Math.round(discounts.overheadY2)}/unit</span></div>
+        <div class="cost-row total"><span>Total Y1 Discount</span><span>${PRICING.formatPercent(discounts.totalY1)}</span></div>
+        <div class="cost-row total"><span>Total Y2+ Discount</span><span class="good">${PRICING.formatPercent(discounts.totalY2)}</span></div>
+      `;
+
+      // Volume tier economics
+      const currentTier = PRICING.getVolumeTier(discountUnits);
+      const nextTier = PRICING.getNextVolumeTier(discountUnits);
+      const y2List = PRICING.year2ListPrice(rate, duration, contractYrs, existingFleet);
+      const savingsPerUnit = y2List * discounts.volume;
+
+      let volumeEconHtml = `
+        <div class="cost-row"><span>Total Commitment (actual)</span><span>${totalUnits} units</span></div>
+        <div class="cost-row"><span>Discount Basis (blended)</span><span>${Math.round(discountUnits)} units</span></div>
+        <div class="cost-row"><span>Current Tier</span><span>${currentTier.minUnits}+ units (${PRICING.formatPercent(currentTier.discount)})</span></div>
+        <div class="cost-row"><span>Y2+ Savings per Unit</span><span>$${Math.round(savingsPerUnit)}/yr</span></div>
+      `;
+
+      if (nextTier) {
+        const unitsToNext = nextTier.minUnits - discountUnits;
+        volumeEconHtml += `
+          <div class="cost-row"><span>Next Tier</span><span>${nextTier.minUnits}+ units (${PRICING.formatPercent(nextTier.discount)})</span></div>
+          <div class="cost-row"><span>Units to Next Tier</span><span>${Math.ceil(unitsToNext)} blended units</span></div>
+        `;
+      } else {
+        volumeEconHtml += `<div class="cost-row"><span>Status</span><span class="good">Maximum tier reached!</span></div>`;
+      }
+
+      document.getElementById('volumeTierEconomics').innerHTML = volumeEconHtml;
+
+      // Config summary
+      const maxVolumeDisc = C.discounts.volumeTiers[0].discount;
+      const maxContractDisc = Math.max(...Object.values(C.contractDiscounts));
+      document.getElementById('configSummary').innerHTML = `
+        <div class="cost-row"><span>Y1 Base Price</span><span>$${C.pricing.year1FixedPrice}</span></div>
+        <div class="cost-row"><span>Y1 Shift Factor</span><span>${Math.round(C.pricing.year1ShiftFactor * 100)}%</span></div>
+        <div class="cost-row"><span>Y2+ Margin</span><span>${Math.round(C.pricing.margins.year2Plus * 100)}%</span></div>
+        <div class="cost-row"><span>Y1 Overhead Factor</span><span>${C.pricing.overheadYear1Factor}</span></div>
+        <div class="cost-row"><span>Y1 Overhead Credit Years</span><span>${C.pricing.overheadCreditYears}</span></div>
+        <div class="cost-row"><span>Y2+ Baseline Years</span><span>${C.pricing.year2BaselineYears}</span></div>
+        <div class="cost-row"><span>Y2+ Min Gap</span><span>$${C.pricing.year2MinGap}</span></div>
+        <div class="cost-row"><span>License Price (Y1 / Y2+)</span><span>$${C.licensing.year1} / $${C.licensing.year2Plus}</span></div>
+        <div class="cost-row"><span>Scale Floor</span><span>${Math.round(C.scaleEfficiency.scaleFloor * 100)}%</span></div>
+        <div class="cost-row"><span>Max Volume Discount</span><span>${maxVolumeDisc * 100}%</span></div>
+        <div class="cost-row"><span>Y1 Volume Factor</span><span>${C.discounts.year1VolumeFactor * 100}%</span></div>
+        <div class="cost-row"><span>Volume Duration Weight</span><span>${Math.round((C.discounts.volumeDurationWeight || 0) * 100)}%</span></div>
+        <div class="cost-row total"><span>Max Contract Discount</span><span>${Math.round(maxContractDisc * 100)}%</span></div>
+      `;
+
+      // Monthly financials (customer spend & our revenue)
+      const monthlyY1Revenue = rate * y1Price;
+      const monthlyY1Cost = rate * (y1Cost + overheadY1);
+      const monthlyY1Profit = monthlyY1Revenue - monthlyY1Cost;
+      const annualNewUnits = rate * 12;
+
+      // Break out hardware vs labor
+      const monthlyHardwareCost = rate * C.hardware.fluxBox;
+      const laborHoursPerUnit = C.labor.buildHoursPerUnit + supportHoursY1 + C.labor.coordinationHoursPerUnit;
+      const monthlyLaborCost = rate * laborHoursPerUnit * C.labor.hourlyRate;
+      const monthlyLicenseRevenue = rate * C.licensing.year1;
+
+      document.getElementById('monthlyFinancials').innerHTML = `
+        <div class="cost-row"><span>New Units/Month</span><span>${rate}</span></div>
+        <div class="cost-row"><span>Monthly Y1 Revenue</span><span>$${monthlyY1Revenue.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Hardware Cost</span><span>$${Math.ceil(monthlyHardwareCost).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly License Revenue (included)</span><span>$${Math.ceil(monthlyLicenseRevenue).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Labor Cost</span><span>$${Math.ceil(monthlyLaborCost).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly Y1 Cost (total)</span><span>$${Math.ceil(monthlyY1Cost).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Monthly Y1 Profit</span><span class="${marginClass(monthlyY1Profit/monthlyY1Revenue)}">$${Math.ceil(monthlyY1Profit).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Annual New Units</span><span>${annualNewUnits}</span></div>
+        <div class="cost-row"><span>Annual Y1 Revenue</span><span>$${(monthlyY1Revenue * 12).toLocaleString()}</span></div>
+      `;
+
+      // Labor budget analysis (based on total commitment)
+      const supportHoursPerUnitY2 = PRICING.supportHoursForYear(2, rate, duration, existingFleet);
+      const supportHoursNeeded = totalUnits * supportHoursPerUnitY2;
+      const supportFTEs = supportHoursNeeded / C.labor.fteHoursPerYear;
+      const overheadFTEs = C.overhead.devMaintenanceFTEs;
+      const totalFTEs = supportFTEs + overheadFTEs;
+      const totalLaborCost = (Math.ceil(totalFTEs) * C.labor.fteSalary) + C.overhead.additionalAnnualCost;
+
+      // Available labor budget = revenue minus hardware costs
+      const annualY2Revenue = totalUnits * y2Price;
+      const annualHardwareReserve = totalUnits * PRICING.hardwareReserve;
+      const annualOverheadShare = totalUnits * overheadPerUnit;
+      const availableForLabor = annualY2Revenue - annualHardwareReserve - annualOverheadShare;
+      const laborUtilization = totalLaborCost / availableForLabor;
+
+      document.getElementById('laborBudget').innerHTML = `
+        <div class="cost-row"><span>Total Commitment</span><span>${totalUnits} units</span></div>
+        <div class="cost-row"><span>Support Hours (Y2+)</span><span>${supportHoursNeeded.toLocaleString()} hrs/yr</span></div>
+        <div class="cost-row"><span>Support FTEs</span><span>${supportFTEs.toFixed(2)}</span></div>
+        <div class="cost-row"><span>Dev/Maintenance FTEs</span><span>${overheadFTEs.toFixed(2)}</span></div>
+        <div class="cost-row"><span>Total FTEs Needed</span><span>${totalFTEs.toFixed(2)}</span></div>
+        <div class="cost-row"><span>Total Labor Cost</span><span>$${totalLaborCost.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Y2+ Revenue</span><span>$${annualY2Revenue.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Hardware Reserve</span><span>-$${Math.ceil(annualHardwareReserve).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Overhead Share</span><span>-$${Math.ceil(annualOverheadShare).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Available for Labor</span><span>$${Math.ceil(availableForLabor).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Labor Utilization</span><span class="${laborUtilization > 1 ? 'bad' : laborUtilization > 0.8 ? 'warning' : 'good'}">${Math.round(laborUtilization * 100)}%</span></div>
+      `;
+
+      // Efficiency projection - show support hours by year
+      const efficiencyRows = [];
+      for (let yr = 1; yr <= 6; yr++) {
+        const hrs = PRICING.supportHoursForYear(yr, rate, duration, existingFleet);
+        const cost = hrs * C.labor.hourlyRate;
+        const pct = (hrs / C.labor.supportHoursPerUnitYear * 100).toFixed(0);
+        const label = yr === 6 ? `Year ${yr}+ (floor)` : `Year ${yr}`;
+        efficiencyRows.push(`<div class="cost-row"><span>${label}</span><span>${hrs.toFixed(1)} hrs x $${C.labor.hourlyRate} = $${Math.ceil(cost)} (${pct}%)</span></div>`);
+      }
+      document.getElementById('efficiencyProjection').innerHTML = efficiencyRows.join('');
+
+      // Commitment summary
+      const contractTotal = PRICING.contractPrice(rate, duration, contractYrs, existingFleet);
+      const y2Overhead = PRICING.overheadBlended(contractYrs, rate, duration, existingFleet);
+      const unitCost = y1Cost + overheadY1 + (contractYrs - 1) * (y2Cost + y2Overhead);
+
+      document.getElementById('commitmentSummary').innerHTML = `
+        <div class="cost-row"><span>Rate</span><span>${rate} units/mo</span></div>
+        <div class="cost-row"><span>Commitment Duration</span><span>${duration} years</span></div>
+        <div class="cost-row"><span>Contract Length</span><span>${contractYrs} years/unit</span></div>
+        <div class="cost-row"><span>Existing Fleet</span><span>${existingFleet.toLocaleString()} units</span></div>
+        <div class="cost-row total"><span>Total Commitment</span><span>${totalUnits.toLocaleString()} units</span></div>
+        <div class="cost-row"><span>Price per Unit (${contractYrs}yr)</span><span>$${contractTotal.toLocaleString()}</span></div>
+        <div class="cost-row"><span>Cost per Unit (${contractYrs}yr)</span><span>$${Math.ceil(unitCost).toLocaleString()}</span></div>
+      `;
+
+      // Profitability analysis over full commitment
+      const totalRevenue = totalUnits * contractTotal;
+      const totalUnitCosts = totalUnits * unitCost;
+      const totalCosts = totalUnitCosts;
+      const netProfit = totalRevenue - totalCosts;
+      const profitMargin = netProfit / totalRevenue;
+      const annualProfit = netProfit / duration;
+      const profitPerUnit = netProfit / totalUnits;
+
+      document.getElementById('profitabilityAnalysis').innerHTML = `
+        <div class="cost-row"><span>Total Revenue</span><span>$${Math.ceil(totalRevenue).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Unit Costs</span><span>$${Math.ceil(totalUnitCosts).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Total Costs</span><span>$${Math.ceil(totalCosts).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Net Profit</span><span class="${marginClass(profitMargin)}">$${Math.ceil(netProfit).toLocaleString()}</span></div>
+        <div class="cost-row total"><span>Profit Margin</span><span class="${marginClass(profitMargin)}">${Math.round(profitMargin * 100)}%</span></div>
+        <div class="cost-row"><span>Annual Profit</span><span>$${Math.ceil(annualProfit).toLocaleString()}/yr</span></div>
+        <div class="cost-row"><span>Profit per Unit</span><span>$${Math.ceil(profitPerUnit).toLocaleString()}/unit</span></div>
+      `;
+
+      // Part number pricing sheet
+      const customerPricingTbody = document.querySelector('#customerPricingTable tbody');
+      customerPricingTbody.innerHTML = '';
+      const y1CostBase = PRICING.year1Cost(rate, duration, existingFleet);
+      const y1OverheadBase = PRICING.overheadPerUnitForYear(1, rate, duration, existingFleet) * CONFIG.pricing.overheadYear1Factor;
+
+      PART_NUMBERS.forEach(pn => {
+        const y1 = PRICING.year1Price(rate, duration, pn.years, existingFleet);
+        const y2 = pn.years > 1 ? PRICING.year2Price(rate, duration, pn.years, existingFleet) : 0;
+        const total = PRICING.contractPrice(rate, duration, pn.years, existingFleet);
+        const years = Math.max(0, pn.years - 1);
+        const y2Cost = PRICING.year2CostBlended(pn.years, rate, duration, existingFleet);
+        const y2Overhead = PRICING.overheadBlended(pn.years, rate, duration, existingFleet);
+        const unitCost = y1CostBase + y1OverheadBase + (years * (y2Cost + y2Overhead));
+        const profit = total - unitCost;
+        const margin = total > 0 ? profit / total : 0;
+        const sarahTotal = getSarahPrice(totalUnits, pn.years);
+        const sarahMarkup = sarahTotal ? ` <span class="faint">${formatCurrencyRaw(sarahTotal)}</span>` : '';
+
+        const row = document.createElement('tr');
+        if (pn.years === contractYrs) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td><code>${pn.partNum}</code></td>
+          <td>${PRICING.formatCurrency(y1)}</td>
+          <td>${pn.years > 1 ? PRICING.formatCurrency(y2) : '-'}</td>
+          <td><strong>${PRICING.formatCurrency(total)}</strong>${sarahMarkup}</td>
+          <td>${formatCurrencyRaw(unitCost)}</td>
+          <td class="${profit >= 0 ? 'good' : 'bad'}">${formatCurrencyRaw(profit)}</td>
+          <td class="${marginClass(margin)}">${PRICING.formatPercent(margin)}</td>
+        `;
+        customerPricingTbody.appendChild(row);
+      });
+
+      const partNumberTbody = document.querySelector('#partNumberTable tbody');
+      partNumberTbody.innerHTML = '';
+
+      PART_NUMBERS.forEach(pn => {
+        const y1 = PRICING.year1Price(rate, duration, pn.years, existingFleet);
+        const y2 = pn.years > 1 ? PRICING.year2Price(rate, duration, pn.years, existingFleet) : 0;
+        const total = PRICING.contractPrice(rate, duration, pn.years, existingFleet);
+        const margin = PRICING.contractMargin(rate, duration, pn.years, existingFleet);
+
+        const row = document.createElement('tr');
+        if (pn.years === contractYrs) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td><code>${pn.partNum}</code></td>
+          <td>${pn.desc}</td>
+          <td>${PRICING.formatCurrency(y1)}</td>
+          <td>${pn.years > 1 ? PRICING.formatCurrency(y2) : '-'}</td>
+          <td><strong>${PRICING.formatCurrency(total)}</strong></td>
+          <td class="${marginClass(margin)}">${PRICING.formatPercent(margin)}</td>
+        `;
+        partNumberTbody.appendChild(row);
+      });
+
+      // Timing comparison (240 units example)
+      const timingTbody = document.querySelector('#timingComparisonTable tbody');
+      timingTbody.innerHTML = '';
+
+      const timingScenarios = [
+        { label: '20/mo × 1yr', rate: 20, duration: 1 },
+        { label: '10/mo × 2yr', rate: 10, duration: 2 },
+        { label: '10/mo × 4yr', rate: 10, duration: 4 },
+        { label: '20/mo × 2yr', rate: 20, duration: 2 },
+      ];
+
+      timingScenarios.forEach(s => {
+        const units = PRICING.totalCommitment(s.rate, s.duration);
+        const discountUnitsScenario = PRICING.discountBasisUnits(s.rate, s.duration);
+        const volumeDisc = PRICING.volumeDiscount(discountUnitsScenario);
+        const y1 = PRICING.year1Price(s.rate, s.duration, 5, existingFleet); // 5-year contract
+        const y2 = PRICING.year2Price(s.rate, s.duration, 5, existingFleet);
+        const total = PRICING.contractPrice(s.rate, s.duration, 5, existingFleet);
+
+        // Calculate note about current scenario
+        const isCurrent = s.rate === rate && s.duration === duration;
+        let note = '';
+        if (units === 240) {
+          note = `Same total (240, blended ${Math.round(discountUnitsScenario)})`;
+        } else {
+          note = `${units} units (blended ${Math.round(discountUnitsScenario)})`;
+        }
+
+        const row = document.createElement('tr');
+        if (isCurrent) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td>${isCurrent ? '-> ' : ''}${s.label}</td>
+          <td>${units}</td>
+          <td>${PRICING.formatPercent(volumeDisc)}</td>
+          <td>${PRICING.formatCurrency(y1)}</td>
+          <td>${PRICING.formatCurrency(y2)}</td>
+          <td><strong>${PRICING.formatCurrency(total)}</strong></td>
+          <td style="color: #86868b; font-size: 0.8rem;">${note}</td>
+        `;
+        timingTbody.appendChild(row);
+      });
+
+      // Volume margin table
+      const volumeTbody = document.querySelector('#volumeMarginTable tbody');
+      volumeTbody.innerHTML = '';
+
+      const volumeTiers = buildTierRanges();
+
+      volumeTiers.forEach(tier => {
+        const isCurrentTier = discountUnits >= tier.min && discountUnits <= tier.max;
+
+        const tierVolumeDisc = PRICING.volumeDiscount(tier.min);
+        // Calculate prices at this tier (using tempRate/tempDuration to hit the tier)
+        const tempRate = 10;
+        const tempDuration = durationForDiscountUnits(tempRate, tier.min);
+        const tierY1Price = PRICING.year1Price(tempRate, tempDuration, contractYrs, existingFleet);
+        const tierY2Price = PRICING.year2Price(tempRate, tempDuration, contractYrs, existingFleet);
+        const tierY1Margin = PRICING.year1Margin(tempRate, tempDuration, contractYrs, existingFleet);
+        const tierY2Margin = PRICING.year2Margin(tempRate, tempDuration, contractYrs, existingFleet);
+
+        const row = document.createElement('tr');
+        if (isCurrentTier) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td>${isCurrentTier ? '-> ' : ''}${tier.label}</td>
+          <td>${PRICING.formatPercent(tierVolumeDisc)}</td>
+          <td>${PRICING.formatCurrency(tierY1Price)}</td>
+          <td class="${marginClass(tierY1Margin)}">${PRICING.formatPercent(tierY1Margin)}</td>
+          <td>${PRICING.formatCurrency(tierY2Price)}</td>
+          <td class="${marginClass(tierY2Margin)}">${PRICING.formatPercent(tierY2Margin)}</td>
+        `;
+        volumeTbody.appendChild(row);
+      });
+
+      // Margin table
+      const marginTbody = document.querySelector('#marginTable tbody');
+      marginTbody.innerHTML = '';
+
+      const combos = [
+        { rate: 10, duration: 1, label: '120 units (10/mo, 1yr)' },
+        { rate: 10, duration: 2, label: '240 units (10/mo, 2yr)' },
+        { rate: 10, duration: 3, label: '360 units (10/mo, 3yr)' },
+        { rate: 10, duration: 4, label: '480 units (10/mo, 4yr)' },
+        { rate: 15, duration: 3, label: '540 units (15/mo, 3yr)' },
+        { rate: 20, duration: 3, label: '720 units (20/mo, 3yr)' },
+        { rate: 25, duration: 2, label: '600 units (25/mo, 2yr)' },
+      ];
+
+      combos.forEach(c => {
+        const isSelected = c.rate === rate && c.duration === duration;
+        const comboUnits = PRICING.totalCommitment(c.rate, c.duration);
+        const disc = PRICING.year2TotalDiscount(c.rate, c.duration, contractYrs);
+        const y1p = PRICING.year1Price(c.rate, c.duration, contractYrs, existingFleet);
+        const y1m = PRICING.year1Margin(c.rate, c.duration, contractYrs, existingFleet);
+        const y2p = PRICING.year2Price(c.rate, c.duration, contractYrs, existingFleet);
+        const y2m = PRICING.year2Margin(c.rate, c.duration, contractYrs, existingFleet);
+
+        const row = document.createElement('tr');
+        if (isSelected) row.classList.add('highlight');
+
+        row.innerHTML = `
+          <td>${c.label}</td>
+          <td>${PRICING.formatPercent(disc)}</td>
+          <td>${PRICING.formatCurrency(y1p)}</td>
+          <td class="${marginClass(y1m)}">${PRICING.formatPercent(y1m)}</td>
+          <td>${PRICING.formatCurrency(y2p)}</td>
+          <td class="${marginClass(y2m)}">${PRICING.formatPercent(y2m)}</td>
+        `;
+        marginTbody.appendChild(row);
+      });
+    }
+
+    function bindContractButtons() {
+      document.querySelectorAll('.contract-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setActiveContract(parseInt(btn.dataset.years));
+          update();
+          scheduleUiSave();
+        });
+      });
+    }
+
+    async function init() {
+      const config = await loadConfig();
+      if (config) {
+        deepMerge(CONFIG, config);
+      }
+      renderContractButtons();
+      const uiState = loadUiState();
+      if (uiState || config) {
+        applyState({ config, ui: uiState });
+      } else {
+        setActiveContract(selectedContract);
+      }
+      bindContractButtons();
+      setInputsFromConfig();
+      addPanelPins();
+      bindAllInputs();
+      enablePinning();
+      update();
+    }
+
+    init();
+
+    if (stateChannel) {
+      stateChannel.onmessage = async (event) => {
+        const msg = event.data || {};
+        if (msg.type !== 'config-updated' || msg.source === TAB_ID) return;
+        const config = await loadConfig();
+        if (config) {
+          applyState({ config });
+        }
+      };
+    } else {
+      window.addEventListener('storage', async (event) => {
+        if (event.key !== 'srs-state-ping' || !event.newValue) return;
+        try {
+          const msg = JSON.parse(event.newValue);
+          if (msg.source === TAB_ID) return;
+          if (msg.type !== 'config-updated') return;
+        } catch (err) {
+          return;
+        }
+        const config = await loadConfig();
+        if (config) {
+          applyState({ config });
+        }
+      });
+    }
+  </script>
+</body>
+</html>

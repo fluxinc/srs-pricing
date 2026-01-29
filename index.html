@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flux Mobile SRS Bridge - Fleet Discount Program</title>
+  <title>Mobile SRS Bridge - Fleet Discount Program</title>
   <script src="config.js"></script>
   <script src="pricing.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,84 +15,91 @@
       background: #222222;
       color: #f5f5f7;
       line-height: 1.5;
-      padding: 2rem;
+      padding: 1rem;
     }
 
     .container { max-width: 900px; margin: 0 auto; }
 
-    .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; }
     .logo {
-      height: 40px;
+      height: 32px;
       width: auto;
+      order: 2;
     }
-    h1 { font-size: 2rem; font-weight: 600; }
+    h1 { font-size: 1.5rem; font-weight: 600; order: 1; }
 
-    .subtitle { color: #86868b; margin-bottom: 2rem; }
+    .subtitle { color: #86868b; margin-bottom: 1.5rem; font-size: 0.9rem; }
     .tagline { color: #e84200; font-weight: 500; }
 
     .controls {
       background: #1c1c1e;
       border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
       border: 1px solid #2c2c2e;
     }
 
     .control-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 2rem;
+      gap: 1.5rem;
       margin-bottom: 1rem;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .control-row { grid-template-columns: 1fr; gap: 1rem; }
+      .control-row:last-child { margin-bottom: 0; }
     }
 
-    label { display: block; font-weight: 500; margin-bottom: 0.5rem; }
+    label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .commitment-value { color: #e84200; font-weight: 600; }
 
-    .slider-container { display: flex; align-items: center; gap: 1rem; }
+    .slider-container { display: flex; align-items: center; gap: 0.75rem; }
 
     input[type="range"] {
       flex: 1;
-      height: 8px;
+      height: 6px;
       -webkit-appearance: none;
       appearance: none;
       background: #3a3a3c;
       border-radius: 4px;
       outline: none;
+      min-width: 0;
     }
 
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       background: #e84200;
       border-radius: 50%;
       cursor: pointer;
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       background: #e84200;
       border-radius: 50%;
       cursor: pointer;
       border: none;
     }
 
-    .slider-value { font-size: 1.25rem; font-weight: 600; min-width: 100px; text-align: right; }
+    .slider-value { font-size: 1.1rem; font-weight: 600; min-width: 70px; text-align: right; white-space: nowrap; }
 
-    .contract-buttons { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    .contract-buttons { display: flex; gap: 0.5rem; margin-top: 0.5rem; flex-wrap: wrap; }
     .contract-btn {
       background: #2c2c2e;
       border: 1px solid #3a3a3c;
       color: #f5f5f7;
-      padding: 0.5rem 1rem;
+      padding: 0.5rem 0.75rem;
       border-radius: 6px;
       cursor: pointer;
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       transition: all 0.2s;
+      flex: 1;
+      min-width: 60px;
+      text-align: center;
     }
     .contract-btn:hover { background: #3a3a3c; }
     .contract-btn.active {
@@ -101,29 +108,34 @@
       font-weight: 600;
     }
 
+    @media (max-width: 400px) {
+      .contract-buttons { gap: 0.4rem; }
+      .contract-btn { padding: 0.4rem 0.5rem; font-size: 0.75rem; min-width: 50px; }
+    }
+
     .discount-highlight {
       background: linear-gradient(135deg, #1a3a1a 0%, #1c1c1e 100%);
       border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
       border: 1px solid #2d5a2d;
       text-align: center;
     }
 
     .discount-title {
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       color: #86868b;
       margin-bottom: 0.5rem;
     }
 
     .discount-amount {
-      font-size: 2.5rem;
+      font-size: 2rem;
       font-weight: 700;
       color: #4ade80;
     }
 
     .discount-subtitle {
-      font-size: 0.875rem;
+      font-size: 0.8rem;
       color: #86868b;
       margin-top: 0.5rem;
     }
@@ -131,47 +143,66 @@
     .discount-breakdown {
       display: flex;
       justify-content: center;
-      gap: 2rem;
+      gap: 1.5rem;
       margin-top: 1rem;
       flex-wrap: wrap;
     }
 
     .discount-item {
       text-align: center;
+      min-width: 80px;
     }
 
     .discount-label {
-      font-size: 0.75rem;
+      font-size: 0.7rem;
       color: #86868b;
     }
 
     .discount-value {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 600;
     }
 
     .discount-value.active { color: #4ade80; }
 
+    @media (max-width: 640px) {
+      .discount-amount { font-size: 1.75rem; }
+      .discount-title { font-size: 0.75rem; }
+      .discount-subtitle { font-size: 0.75rem; }
+      .discount-breakdown { gap: 1rem; }
+    }
+
+    @media (min-width: 641px) {
+      body { padding: 2rem; }
+      .controls { padding: 1.5rem; }
+      .discount-highlight { padding: 1.5rem; margin-bottom: 1.5rem; }
+      h1 { font-size: 2rem; }
+      .logo { height: 40px; }
+      .subtitle { margin-bottom: 2rem; font-size: 1rem; }
+      .controls { margin-bottom: 1.5rem; }
+    }
+
     .table-container {
       background: #1c1c1e;
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1rem;
       border: 1px solid #2c2c2e;
       overflow-x: auto;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      -webkit-overflow-scrolling: touch;
     }
 
-    .table-title { font-weight: 600; margin-bottom: 1rem; }
+    .table-title { font-weight: 600; margin-bottom: 0.75rem; font-size: 0.95rem; }
 
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 0.75rem 1rem; text-align: right; border-bottom: 1px solid #2c2c2e; }
-    th { font-weight: 600; color: #86868b; font-size: 0.875rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 500px; }
+    th, td { padding: 0.6rem 0.5rem; text-align: right; border-bottom: 1px solid #2c2c2e; }
+    th { font-weight: 600; color: #86868b; font-size: 0.75rem; white-space: nowrap; }
     th:first-child, td:first-child { text-align: left; }
     tr:last-child td { border-bottom: none; }
 
-    .part-number { font-family: monospace; color: #e84200; font-size: 1rem; font-weight: 600; }
-    .price-main { font-size: 1.25rem; font-weight: 600; }
-    .price-sub { font-size: 0.875rem; color: #86868b; }
+    .part-number { font-family: monospace; color: #e84200; font-size: 0.9rem; font-weight: 600; white-space: nowrap; }
+    .price-main { font-size: 1.1rem; font-weight: 600; }
+    .price-sub { font-size: 0.75rem; color: #86868b; }
     .discount-badge {
       display: inline-block;
       background: #e84200;
@@ -186,22 +217,25 @@
     .fleet-tiers-table {
       background: #1c1c1e;
       border-radius: 12px;
-      padding: 1.5rem;
+      padding: 1rem;
       border: 1px solid #2c2c2e;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .fleet-tiers-table table {
       width: 100%;
+      min-width: 450px;
     }
 
     .fleet-tiers-table th {
       text-align: left;
-      padding: 0.5rem;
+      padding: 0.5rem 0.4rem;
     }
 
     .fleet-tiers-table td {
-      padding: 0.5rem;
+      padding: 0.5rem 0.4rem;
     }
 
     .fleet-tiers-table tr.current-tier {
@@ -213,40 +247,53 @@
       font-weight: 600;
     }
 
+    @media (min-width: 641px) {
+      .table-container { padding: 1.5rem; margin-bottom: 1.5rem; }
+      .fleet-tiers-table { padding: 1.5rem; margin-bottom: 1.5rem; }
+      .table-title { margin-bottom: 1rem; font-size: 1rem; }
+      th, td { padding: 0.75rem 1rem; }
+      th { font-size: 0.875rem; }
+      .part-number { font-size: 1rem; }
+      .price-main { font-size: 1.25rem; }
+      .price-sub { font-size: 0.875rem; }
+    }
+
     .chart-container {
       background: #1c1c1e;
       border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
     .chart-title {
       font-weight: 600;
-      margin-bottom: 1rem;
+      margin-bottom: 0.75rem;
+      font-size: 0.95rem;
     }
     .chart-wrapper {
       position: relative;
-      height: 280px;
+      height: 240px;
     }
 
-    .footer { margin-top: 2rem; text-align: center; color: #86868b; font-size: 0.875rem; }
+    .footer { margin-top: 1.5rem; text-align: center; color: #86868b; font-size: 0.75rem; line-height: 1.4; }
 
     .pitch-section {
       background: #1c1c1e;
       border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
       border: 1px solid #2c2c2e;
     }
 
     .pitch-section h2 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
       color: #e84200;
     }
 
     .pitch-section p {
       color: #a1a1a6;
       margin-bottom: 0.75rem;
+      font-size: 0.9rem;
     }
 
     .pitch-section ul {
@@ -257,11 +304,24 @@
     .pitch-section li {
       padding: 0.25rem 0;
       color: #a1a1a6;
+      font-size: 0.9rem;
     }
 
     .pitch-section li::before {
       content: "-> ";
       color: #e84200;
+    }
+
+    .pitch-section p.closing { margin-top: 1rem; }
+
+    @media (min-width: 641px) {
+      .chart-container { padding: 1.5rem; margin-bottom: 1.5rem; }
+      .chart-title { margin-bottom: 1rem; font-size: 1rem; }
+      .chart-wrapper { height: 280px; }
+      .footer { margin-top: 2rem; font-size: 0.875rem; }
+      .pitch-section { padding: 1.5rem; margin-bottom: 1.5rem; }
+      .pitch-section h2 { font-size: 1.25rem; margin-bottom: 1rem; }
+      .pitch-section p, .pitch-section li { font-size: 1rem; }
     }
   </style>
 </head>
@@ -269,10 +329,10 @@
   <div class="container">
     <div class="header">
       <img src="logo.png" alt="Flux" class="logo">
-      <h1>Flux Mobile SRS Bridge</h1>
+      <h1>Mobile SRS Bridge</h1>
     </div>
     <p class="subtitle">
-      <span class="tagline">Volume Discount Program: "Commit More, Save More"</span>
+      <span class="tagline">Installed-Base + Commitment Pricing: "Commit More, Save More"</span>
     </p>
 
     <div class="controls">
@@ -280,30 +340,34 @@
         <div>
           <label>Monthly Order Rate (units/mo)</label>
           <div class="slider-container">
-            <input type="range" id="rateSlider" min="10" max="25" step="5" value="10" aria-label="Monthly order rate">
+            <input type="range" id="rateSlider" min="10" max="25" step="1" value="10" aria-label="Monthly order rate">
             <span class="slider-value"><span id="rateValue">10</span>/mo</span>
           </div>
         </div>
         <div>
           <label>Commitment Duration (years)</label>
           <div class="slider-container">
-            <input type="range" id="durationSlider" min="1" max="10" step="1" value="4" aria-label="Commitment duration">
-            <span class="slider-value"><span id="durationValue">4</span> yr</span>
+            <input type="range" id="durationSlider" min="1" max="5" step="1" value="3" aria-label="Commitment duration">
+            <span class="slider-value"><span id="durationValue">3</span> yr</span>
           </div>
         </div>
       </div>
       <div class="control-row">
         <div>
-          <label>Total Commitment: <span id="totalCommitment" style="color: #e84200; font-weight: 600;">480 units</span></label>
+          <label>Existing Fleet (installed units)</label>
+          <div class="slider-container">
+            <input type="range" id="fleetSlider" min="0" max="1000" step="50" value="0" aria-label="Existing fleet size">
+            <span class="slider-value"><span id="fleetValue">0</span> units</span>
+          </div>
         </div>
         <div>
           <label>Contract Length (per unit)</label>
-          <div class="contract-buttons" id="contractButtons">
-            <button class="contract-btn" data-years="1">1-Year</button>
-            <button class="contract-btn" data-years="3">3-Year</button>
-            <button class="contract-btn active" data-years="5">5-Year</button>
-            <button class="contract-btn" data-years="10">10-Year</button>
-          </div>
+          <div class="contract-buttons" id="contractButtons"></div>
+        </div>
+      </div>
+      <div class="control-row">
+        <div>
+          <label>Total Commitment (actual): <span id="totalCommitment" class="commitment-value">360 units</span></label>
         </div>
       </div>
     </div>
@@ -324,11 +388,12 @@
     </div>
 
     <div class="discount-highlight">
-      <div class="discount-title">Your Total Year 2+ Discount (<span id="totalUnitsDisplay">480</span> units committed)</div>
+      <div class="discount-title">Your Total Year 2+ Discount (based on <span id="totalUnitsDisplay">480</span> blended units)</div>
       <div class="discount-amount" id="totalY2Discount">30%</div>
       <div class="discount-subtitle">
-        Y2+ Price: <span id="y2PriceDisplay">$1,100</span>/unit/year (base: $1,550)
+        Y2+ Price: <span id="y2PriceDisplay">$1,100</span>/unit/year (list: <span id="y2ListDisplay">$1,550</span>)
       </div>
+      <div class="discount-subtitle" id="discountBasisDisplay">Discount basis: 480 units · Actual commitment: 480 units</div>
       <div class="discount-breakdown">
         <div class="discount-item">
           <div class="discount-label">Volume (Y2+)</div>
@@ -342,11 +407,11 @@
     </div>
 
     <div class="fleet-tiers-table">
-      <div class="table-title">Volume Commitment Discount Tiers</div>
+      <div class="table-title">Volume Discount Tiers (blended units)</div>
       <table id="volumeTiersTable">
         <thead>
           <tr>
-            <th>Total Commitment</th>
+            <th>Blended Units</th>
             <th>Volume Discount</th>
             <th>Y1 Discount</th>
             <th>Example Y2+ Price</th>
@@ -367,33 +432,173 @@
       <h2>How Your Discounts Work</h2>
       <p>Your pricing is based on two simple factors:</p>
       <ul>
-        <li><strong>Volume Commitment:</strong> Total units = monthly rate × 12 × years. Higher commitments unlock deeper discounts (Y1 gets 50% of volume discount, Y2+ gets full discount)</li>
+        <li><strong>Volume Commitment:</strong> Discount basis blends annual rate and duration (annual units + a duration-weighted add-on). Higher monthly rates unlock deeper discounts sooner.</li>
         <li><strong>Contract Length:</strong> Longer per-unit contracts (1/3/5/10 year) reduce pricing</li>
       </ul>
-      <p style="margin-top: 1rem;"><strong>The more you commit upfront, the more you save across the entire deal.</strong></p>
+      <p class="closing"><strong>The more you commit upfront, the more you save across the entire deal.</strong></p>
     </div>
 
     <div class="footer" id="footer"></div>
   </div>
 
   <script>
-    const CONTRACT_YEARS = [1, 3, 5, 10];
-    let selectedContract = 5;
+    const CONTRACT_YEARS = Object.keys(CONFIG.contractDiscounts)
+      .map(Number)
+      .filter(Number.isFinite)
+      .sort((a, b) => a - b);
+    let selectedContract = Math.max(...CONTRACT_YEARS);
     let priceChart = null;
+    const TAB_ID = Math.random().toString(36).slice(2);
+    const stateChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('srs-state') : null;
+
+    function deepMerge(target, source) {
+      if (!source || typeof source !== 'object') return target;
+      Object.keys(source).forEach(key => {
+        if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+          if (!target[key]) target[key] = {};
+          deepMerge(target[key], source[key]);
+        } else {
+          target[key] = source[key];
+        }
+      });
+      return target;
+    }
+
+    function getConfigOverrides() {
+      return JSON.parse(JSON.stringify(CONFIG));
+    }
+
+    function getUiState() {
+      return {
+        rate: parseInt(document.getElementById('rateSlider').value),
+        duration: parseInt(document.getElementById('durationSlider').value),
+        selectedContract: selectedContract,
+        existingFleet: parseInt(document.getElementById('fleetSlider').value),
+      };
+    }
+
+    function loadUiState() {
+      try {
+        const raw = localStorage.getItem('srs-ui-public');
+        return raw ? JSON.parse(raw) : null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function saveUiState() {
+      try {
+        localStorage.setItem('srs-ui-public', JSON.stringify(getUiState()));
+      } catch (err) {
+        // ignore storage failures
+      }
+    }
+
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config', { cache: 'no-store' });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (err) {
+        console.warn('Failed to load config', err);
+        return null;
+      }
+    }
+
+    let saveTimer = null;
+    function scheduleSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(saveUiState, 200);
+    }
+
+    function broadcastConfigUpdate() {
+      const message = { type: 'config-updated', source: TAB_ID, ts: Date.now() };
+      if (stateChannel) {
+        stateChannel.postMessage(message);
+        return;
+      }
+      try {
+        localStorage.setItem('srs-state-ping', JSON.stringify(message));
+      } catch (err) {
+        // ignore storage failures
+      }
+    }
+
+    function setActiveContract(years) {
+      selectedContract = years;
+      document.querySelectorAll('.contract-btn').forEach(b => b.classList.remove('active'));
+      const active = document.querySelector(`.contract-btn[data-years="${years}"]`);
+      if (active) active.classList.add('active');
+    }
+
+    function setInputClamped(input, value) {
+      if (!input || !Number.isFinite(value)) return;
+      const min = parseFloat(input.min);
+      const max = parseFloat(input.max);
+      let next = value;
+      if (Number.isFinite(min)) next = Math.max(min, next);
+      if (Number.isFinite(max)) next = Math.min(max, next);
+      input.value = next;
+    }
+
+    function applyState(state) {
+      if (!state) return;
+      if (state.config) {
+        deepMerge(CONFIG, state.config);
+      }
+      if (state.ui) {
+        setInputClamped(document.getElementById('rateSlider'), state.ui.rate);
+        setInputClamped(document.getElementById('durationSlider'), state.ui.duration);
+        setInputClamped(document.getElementById('fleetSlider'), state.ui.existingFleet);
+        if (Number.isFinite(state.ui.selectedContract)) selectedContract = state.ui.selectedContract;
+      }
+      if (!CONTRACT_YEARS.includes(selectedContract)) {
+        selectedContract = Math.max(...CONTRACT_YEARS);
+      }
+      setActiveContract(selectedContract);
+      update();
+    }
+
+    function buildTierRanges() {
+      const mins = CONFIG.discounts.volumeTiers.map(t => t.minUnits).concat([0]);
+      const uniq = Array.from(new Set(mins)).sort((a, b) => a - b);
+      return uniq.map((min, idx) => {
+        const next = uniq[idx + 1];
+        const max = Number.isFinite(next) ? next - 1 : Infinity;
+        const label = Number.isFinite(next) ? `${min}-${max} units` : `${min}+ units`;
+        return { min, max, label };
+      });
+    }
+
+    function renderContractButtons() {
+      const container = document.getElementById('contractButtons');
+      container.innerHTML = '';
+      CONTRACT_YEARS.forEach((years) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'contract-btn';
+        btn.dataset.years = years;
+        btn.textContent = `${years}-Year`;
+        container.appendChild(btn);
+      });
+    }
 
     function update() {
       const rate = parseInt(document.getElementById('rateSlider').value);
       const duration = parseInt(document.getElementById('durationSlider').value);
+      const existingFleet = parseInt(document.getElementById('fleetSlider').value);
 
       // Total commitment = rate × 12 × duration
       const totalUnits = PRICING.totalCommitment(rate, duration);
+      const discountUnits = PRICING.discountBasisUnits(rate, duration);
 
       document.getElementById('rateValue').textContent = rate;
       document.getElementById('durationValue').textContent = duration;
+      document.getElementById('fleetValue').textContent = existingFleet;
       document.getElementById('totalCommitment').textContent = totalUnits + ' units';
 
       // Get discount breakdown
-      const discounts = PRICING.getDiscountBreakdown(rate, duration, selectedContract);
+      const discounts = PRICING.getDiscountBreakdown(rate, duration, selectedContract, existingFleet);
 
       // Display discount breakdown
       document.getElementById('volumeDiscValue').textContent = Math.round(discounts.volume * 100) + '%';
@@ -403,30 +608,33 @@
       document.getElementById('volumeDiscValue').className = 'discount-value' + (discounts.volume > 0 ? ' active' : '');
       document.getElementById('contractDiscValue').className = 'discount-value' + (discounts.contract > 0 ? ' active' : '');
 
-      // Total Y2+ discount and price
-      const totalY2Disc = discounts.totalY2;
-      const y2Price = PRICING.year2Price(rate, duration, selectedContract);
+      // Total Y2+ discount and price (relative to list base)
+      const y2Price = PRICING.year2Price(rate, duration, selectedContract, existingFleet);
+      const y2List = PRICING.year2ListPrice(rate, duration, selectedContract, existingFleet);
+      const y2Shift = PRICING.year1ShiftPerYear(rate, duration, selectedContract);
+      const y2License = CONFIG.licensing.year2Plus || 0;
+      const y2BasePaid = Math.max(0, y2Price - y2License - y2Shift);
+      const totalY2Disc = y2List > 0 ? (1 - (y2BasePaid / y2List)) : 0;
       document.getElementById('totalY2Discount').textContent = Math.round(totalY2Disc * 100) + '%';
       document.getElementById('y2PriceDisplay').textContent = PRICING.formatCurrency(y2Price);
-      document.getElementById('totalUnitsDisplay').textContent = totalUnits;
+      document.getElementById('y2ListDisplay').textContent = PRICING.formatCurrency(y2List);
+      document.getElementById('totalUnitsDisplay').textContent = Math.round(discountUnits);
+      document.getElementById('discountBasisDisplay').textContent =
+        `Discount basis: ${Math.round(discountUnits)} units · Actual commitment: ${totalUnits} units`;
 
       // Volume tiers table
       const volumeTbody = document.querySelector('#volumeTiersTable tbody');
       volumeTbody.innerHTML = '';
 
-      const tiers = [
-        { label: '0-119 units', min: 0, max: 119 },
-        { label: '120-239 units', min: 120, max: 239 },
-        { label: '240-359 units', min: 240, max: 359 },
-        { label: '360-499 units', min: 360, max: 499 },
-        { label: '500+ units', min: 500, max: Infinity },
-      ];
+      const tiers = buildTierRanges();
 
       tiers.forEach(tier => {
         const volumeDisc = PRICING.volumeDiscount(tier.min);
         const y1VolumeDisc = volumeDisc * CONFIG.discounts.year1VolumeFactor;
-        const exampleY2Price = PRICING.roundUp50(CONFIG.prices.year2 * (1 - volumeDisc - discounts.contract));
-        const isCurrent = totalUnits >= tier.min && totalUnits <= tier.max;
+        const contractDisc = PRICING.contractDiscount(selectedContract);
+        const exampleY2Base = PRICING.roundUp50(y2List * (1 - volumeDisc - contractDisc));
+        const exampleY2Price = PRICING.roundUp50(exampleY2Base + (CONFIG.licensing.year2Plus || 0));
+        const isCurrent = discountUnits >= tier.min && discountUnits <= tier.max;
 
         const row = document.createElement('tr');
         if (isCurrent) row.classList.add('current-tier');
@@ -445,11 +653,21 @@
       tbody.innerHTML = '';
 
       CONTRACT_YEARS.forEach(contractYrs => {
-        const y1 = PRICING.year1Price(rate, duration, contractYrs);
-        const y2 = PRICING.year2Price(rate, duration, contractYrs);
+        const y1 = PRICING.year1Price(rate, duration, contractYrs, existingFleet);
+        const y2 = PRICING.year2Price(rate, duration, contractYrs, existingFleet);
         const totalContract = y1 + (y2 * Math.max(0, contractYrs - 1));
-        const y1Disc = PRICING.year1TotalDiscount(rate, duration, contractYrs);
-        const y2Disc = PRICING.year2TotalDiscount(rate, duration, contractYrs);
+        const y1List = PRICING.year1ListPrice(rate, duration, contractYrs, existingFleet);
+        const y1Base = PRICING.year1BasePrice(rate, duration);
+        const y1Disc = y1List > 0 ? (1 - (y1Base / y1List)) : 0;
+        const y2List = PRICING.year2ListPrice(rate, duration, contractYrs, existingFleet);
+        const y2Price = PRICING.year2Price(rate, duration, contractYrs, existingFleet);
+        const y2Raw = PRICING.year2PriceRaw(rate, duration, contractYrs, existingFleet);
+        const y2RawRounded = PRICING.roundUp50(y2Raw);
+        const y2Clamp = Math.max(0, y2Price - y2RawRounded);
+        const y2Shift = PRICING.year1ShiftPerYear(rate, duration, contractYrs);
+        const y2License = CONFIG.licensing.year2Plus || 0;
+        const y2BasePaid = Math.max(0, y2Price - y2License - y2Shift);
+        const y2Disc = contractYrs > 1 && y2List > 0 ? (1 - (y2BasePaid / y2List)) : 0;
 
         const row = document.createElement('tr');
         const isSelected = contractYrs === selectedContract;
@@ -466,6 +684,7 @@
           <td>
             <div class="price-main">${contractYrs > 1 ? PRICING.formatCurrency(y2) : '-'}</div>
             <div class="price-sub">${contractYrs > 1 ? (y2Disc > 0 ? Math.round(y2Disc * 100) + '% off' : 'no discount') : ''}</div>
+            ${contractYrs > 1 && y2Clamp > 0 ? `<div class="price-sub">min-gap +${PRICING.formatCurrency(y2Clamp)}</div>` : ''}
           </td>
           <td>
             <div class="price-main">${PRICING.formatCurrency(totalContract)}</div>
@@ -476,35 +695,43 @@
       });
 
       // Update chart
-      updateChart(rate, duration, totalUnits);
+      updateChart(rate, duration, totalUnits, existingFleet);
 
       // Footer
-      const nextTier = PRICING.getNextVolumeTier(totalUnits);
-      let footerText = `${rate}/mo × ${duration} years = ${totalUnits} units committed. `;
+      const nextTier = PRICING.getNextVolumeTier(discountUnits);
+      let footerText = `${rate}/mo × ${duration} years = ${totalUnits} units committed (discount basis: ${Math.round(discountUnits)}). `;
       if (nextTier) {
-        const unitsNeeded = nextTier.minUnits - totalUnits;
-        footerText += `${unitsNeeded} more units unlocks ${Math.round(nextTier.discount * 100)}% volume discount.`;
+        const unitsNeeded = nextTier.minUnits - discountUnits;
+        footerText += `${Math.ceil(unitsNeeded)} more blended units unlocks ${Math.round(nextTier.discount * 100)}% volume discount.`;
       } else {
         footerText += 'Maximum volume discount tier achieved!';
       }
+      footerText += ' Committed rate sets the price ceiling, which then remains based on the size of the fleet currently under contract.';
       document.getElementById('footer').textContent = footerText;
     }
 
     // Contract button handlers
-    document.querySelectorAll('.contract-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.contract-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedContract = parseInt(btn.dataset.years);
-        update();
+    function bindContractButtons() {
+      document.querySelectorAll('.contract-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setActiveContract(parseInt(btn.dataset.years));
+          update();
+          scheduleSave();
+        });
       });
-    });
+    }
 
-    document.getElementById('rateSlider').addEventListener('input', update);
-    document.getElementById('durationSlider').addEventListener('input', update);
+    renderContractButtons();
+    setActiveContract(selectedContract);
+    bindContractButtons();
+
+    document.getElementById('rateSlider').addEventListener('input', () => { update(); scheduleSave(); });
+    document.getElementById('durationSlider').addEventListener('input', () => { update(); scheduleSave(); });
+    document.getElementById('fleetSlider').addEventListener('input', () => { update(); scheduleSave(); });
 
     // Initialize price chart - shows total contract price by commitment level
     const ctx = document.getElementById('priceChart').getContext('2d');
+    const PILOT_CAPS = { 1: 7000, 3: 8500, 5: 9800, 10: 15000 };
     priceChart = new Chart(ctx, {
       type: 'line',
       data: {
@@ -555,19 +782,40 @@
       }
     });
 
-    function updateChart(rate, duration, currentCommitment) {
+    function updateChart(rate, duration, currentCommitment, existingFleet) {
       if (!priceChart) return;
 
-      // Show contract prices at different commitment levels
-      const commitmentLevels = [120, 240, 360, 480, 500, 600];
+      // Show contract prices at different commitment levels (hold duration constant)
+      const minUnits = 120;
+      const maxUnits = Math.max(600, Math.ceil(currentCommitment * 1.5 / 20) * 20);
+      const step = Math.max(20, Math.round((maxUnits - minUnits) / 14 / 10) * 10);
+      const commitmentLevels = [];
+      for (let units = minUnits; units <= maxUnits; units += step) {
+        commitmentLevels.push(units);
+      }
+      if (!commitmentLevels.includes(currentCommitment)) {
+        commitmentLevels.push(currentCommitment);
+      }
+      commitmentLevels.sort((a, b) => a - b);
+
+      const tempDuration = Math.max(1, duration);
       const prices = commitmentLevels.map(units => {
-        // Calculate rate and duration that would give this commitment
-        const tempRate = 10;
-        const tempDuration = units / (tempRate * 12);
-        return PRICING.contractPrice(tempRate, tempDuration, selectedContract);
+        const tempRate = units / (tempDuration * 12);
+        return PRICING.contractPrice(tempRate, tempDuration, selectedContract, existingFleet);
       });
 
-      priceChart.data.datasets[0].data = prices;
+      const pilotCap = PILOT_CAPS[selectedContract] || Math.max(...Object.values(PILOT_CAPS));
+      const cappedPrices = prices.map(price => Math.min(price, pilotCap));
+
+      priceChart.data.labels = commitmentLevels.map(String);
+      priceChart.data.datasets[0].data = cappedPrices;
+
+      const minPrice = Math.min(...cappedPrices);
+      const padding = Math.max(100, Math.ceil((pilotCap - minPrice) * 0.1));
+      const yMin = Math.max(0, Math.floor((minPrice - padding) / 20) * 20);
+      const yMax = Math.ceil(pilotCap / 20) * 20;
+      priceChart.options.scales.y.min = yMin;
+      priceChart.options.scales.y.max = yMax;
 
       // Highlight current commitment position
       const currentIdx = commitmentLevels.findIndex((c, i) => {
@@ -582,8 +830,48 @@
       priceChart.update();
     }
 
+    async function init() {
+      const config = await loadConfig();
+      if (config) {
+        deepMerge(CONFIG, config);
+      }
+      const uiState = loadUiState();
+      if (uiState || config) {
+        applyState({ config, ui: uiState });
+      } else {
+        setActiveContract(selectedContract);
+        update();
+      }
+    }
+
     // Initialize
-    update();
+    init();
+
+    if (stateChannel) {
+      stateChannel.onmessage = async (event) => {
+        const msg = event.data || {};
+        if (msg.type !== 'config-updated' || msg.source === TAB_ID) return;
+        const config = await loadConfig();
+        if (config) {
+          applyState({ config });
+        }
+      };
+    } else {
+      window.addEventListener('storage', async (event) => {
+        if (event.key !== 'srs-state-ping' || !event.newValue) return;
+        try {
+          const msg = JSON.parse(event.newValue);
+          if (msg.source === TAB_ID) return;
+          if (msg.type !== 'config-updated') return;
+        } catch (err) {
+          return;
+        }
+        const config = await loadConfig();
+        if (config) {
+          applyState({ config });
+        }
+      });
+    }
   </script>
 </body>
 </html>
