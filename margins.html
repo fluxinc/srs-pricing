@@ -118,49 +118,49 @@
 
     .hidden { display: none; }
 
-    .lock-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+    .unlock-panel {
       display: flex;
       align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-
-    .lock-card {
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
       background: #1c1c1e;
-      border: 1px solid #2c2c2e;
-      border-radius: 12px;
-      padding: 1rem 1.25rem;
-      width: min(360px, 90vw);
-      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
-      text-align: left;
+      border: 1px solid #e84200;
+      border-radius: 8px;
+      margin-bottom: 1rem;
     }
 
-    .lock-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.35rem; }
-    .lock-sub { font-size: 0.8rem; color: #9b9ba0; margin-bottom: 0.75rem; }
-    .lock-field { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; }
-    .lock-field input[type="password"] {
-      width: 100%;
-      padding: 0.4rem 0.6rem;
-      border-radius: 8px;
+    .unlock-panel input[type="password"] {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
       border: 1px solid #2c2c2e;
       background: #121213;
       color: #f5f5f7;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
     }
-    .lock-field button {
-      padding: 0.4rem 0.7rem;
-      border-radius: 8px;
-      border: 1px solid #3a3a3c;
-      background: #2c2c2e;
-      color: #f5f5f7;
-      font-size: 0.8rem;
+
+    .unlock-panel button {
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: 1px solid #e84200;
+      background: #e84200;
+      color: #1c1c1e;
+      font-size: 0.9rem;
+      font-weight: 600;
       cursor: pointer;
+      white-space: nowrap;
     }
-    .lock-field button:hover { background: #3a3a3c; }
-    .lock-error { margin-top: 0.5rem; color: #ff453a; font-size: 0.75rem; }
+
+    .unlock-panel button:hover {
+      background: #ff5722;
+      border-color: #ff5722;
+    }
+
+    .lock-error {
+      color: #ff453a;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
 
     .lock-toggle {
       border: 1px solid #3a3a3c;
@@ -274,6 +274,57 @@
     .bad { color: #ff453a; }
 
     .footer { margin-top: 1.5rem; text-align: center; color: #86868b; font-size: 0.75rem; }
+
+    .discount-explainer {
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      background: #2c2c2e;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .discount-explainer p {
+      margin: 0 0 0.5rem 0;
+    }
+    .discount-explainer ul {
+      margin: 0;
+      padding-left: 1.5rem;
+    }
+    .discount-explainer li {
+      margin-bottom: 0.4rem;
+    }
+
+    .contract-terms-inline {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #2c2c2e;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    .contract-terms-inline h3 {
+      margin: 0 0 0.75rem 0;
+      font-size: 0.95rem;
+      color: #e84200;
+      font-weight: 600;
+    }
+    .contract-terms-inline p {
+      margin: 0 0 0.75rem 0;
+    }
+    .contract-terms-inline ul {
+      margin: 0 0 0.75rem 0;
+      padding-left: 1.5rem;
+    }
+    .contract-terms-inline li {
+      margin-bottom: 0.5rem;
+    }
+    .contract-terms-inline .terms-example {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #2c2c2e;
+      border-left: 3px solid #e84200;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
 
     code { background: #2c2c2e; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
     .faint { color: #6f6f73; font-weight: 500; }
@@ -550,16 +601,10 @@
     <p class="subtitle">Cost breakdown, margins, and profitability analysis (2-layer discount model)</p>
     <div class="pin-hint">Tip: Alt+Click any input or panel to pin it while you edit. Panels also have a Pin button.</div>
 
-    <div id="lockOverlay" class="lock-overlay hidden">
-      <div class="lock-card">
-        <div class="lock-title">Margin controls locked</div>
-        <div class="lock-sub">Enter password to edit</div>
-        <div class="lock-field">
-          <input type="password" id="lockPassword" placeholder="Password" autocomplete="current-password">
-          <button type="button" id="unlockButton">Unlock</button>
-        </div>
-        <div id="lockError" class="lock-error hidden">Incorrect password</div>
-      </div>
+    <div id="unlockPanel" class="unlock-panel">
+      <input type="password" id="lockPassword" placeholder="Enter password to unlock" autocomplete="current-password">
+      <button type="button" id="unlockButton">Unlock</button>
+      <span id="lockError" class="lock-error hidden">Incorrect password</span>
     </div>
 
     <div class="commitment-bar">
@@ -1092,6 +1137,7 @@
     <div class="footer">
       Edit <code>config.js</code> to adjust costs, margins, and discount settings.
     </div>
+
   </div>
 
   <script>
@@ -1341,20 +1387,35 @@
       });
     }
 
-    const LOCK_PASSWORD = 'fluxmargins';
+    let LOCK_PASSWORD = 'fluxmargins'; // Default fallback
     const LOCK_KEY = 'srs-margins-unlocked';
+
+    async function fetchLockPassword() {
+      try {
+        const response = await fetch('/api/lock-password');
+        if (response.ok) {
+          const data = await response.json();
+          LOCK_PASSWORD = data.password || 'fluxmargins';
+        }
+      } catch (err) {
+        console.warn('Failed to fetch lock password, using default', err);
+      }
+    }
 
     function setLocked(locked) {
       document.body.classList.toggle('locked', locked);
-      const toggle = document.getElementById('lockToggle');
-      if (toggle) {
-        toggle.classList.toggle('active', !locked);
-        toggle.setAttribute('aria-label', locked ? 'Unlock controls' : 'Lock controls');
+      const unlockPanel = document.getElementById('unlockPanel');
+      if (unlockPanel) {
+        unlockPanel.style.display = locked ? 'flex' : 'none';
+      }
+      const lockToggle = document.getElementById('lockToggle');
+      if (lockToggle) {
+        lockToggle.style.display = locked ? 'none' : 'block';
       }
       const controls = document.querySelectorAll('input, button, select, textarea');
       controls.forEach(el => {
-        if (el.closest('#lockOverlay')) return;
-        if (el.dataset.lockExempt !== undefined) return;
+        if (el.closest('#unlockPanel')) return;
+        if (el.id === 'lockToggle') return;
         if (locked) {
           el.dataset.wasDisabled = el.disabled ? '1' : '0';
           el.disabled = true;
@@ -1366,24 +1427,11 @@
       });
     }
 
-    function showLockOverlay() {
-      const overlay = document.getElementById('lockOverlay');
-      if (overlay) overlay.classList.remove('hidden');
-      const passwordInput = document.getElementById('lockPassword');
-      if (passwordInput) passwordInput.focus();
-    }
-
-    function hideLockOverlay() {
-      const overlay = document.getElementById('lockOverlay');
-      if (overlay) overlay.classList.add('hidden');
-      const errorEl = document.getElementById('lockError');
-      if (errorEl) errorEl.classList.add('hidden');
-    }
-
     function initLock() {
-      const unlocked = sessionStorage.getItem(LOCK_KEY) === 'true';
-      setLocked(!unlocked);
-      hideLockOverlay();
+      // Always start locked - clear any previous session
+      sessionStorage.removeItem(LOCK_KEY);
+      setLocked(true);
+
       const unlockButton = document.getElementById('unlockButton');
       const passwordInput = document.getElementById('lockPassword');
       const errorEl = document.getElementById('lockError');
@@ -1394,8 +1442,8 @@
         if (value === LOCK_PASSWORD) {
           sessionStorage.setItem(LOCK_KEY, 'true');
           setLocked(false);
-          hideLockOverlay();
           passwordInput.value = '';
+          if (errorEl) errorEl.classList.add('hidden');
           return;
         }
         if (errorEl) errorEl.classList.remove('hidden');
@@ -1414,10 +1462,6 @@
       }
       if (lockToggle) {
         lockToggle.addEventListener('click', () => {
-          if (document.body.classList.contains('locked')) {
-            showLockOverlay();
-            return;
-          }
           sessionStorage.removeItem(LOCK_KEY);
           setLocked(true);
         });
@@ -2064,6 +2108,7 @@
         `;
         marginTbody.appendChild(row);
       });
+
     }
 
     function bindContractButtons() {
@@ -2096,8 +2141,11 @@
       update();
     }
 
-    initLock();
-    init();
+    (async () => {
+      await fetchLockPassword();
+      await init();
+      initLock();
+    })();
 
     if (stateChannel) {
       stateChannel.onmessage = async (event) => {

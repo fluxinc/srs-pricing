@@ -127,6 +127,11 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true });
 });
 
+app.get('/api/lock-password', (req, res) => {
+  const password = process.env.LOCK_PASSWORD || 'fluxmargins';
+  res.json({ password });
+});
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });

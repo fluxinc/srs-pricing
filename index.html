@@ -340,6 +340,43 @@
       .pitch-section h2 { font-size: 1.25rem; margin-bottom: 1rem; }
       .pitch-section p, .pitch-section li { font-size: 1rem; }
     }
+
+    .contract-terms {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #1c1c1e;
+      border: 1px solid #2c2c2e;
+      border-radius: 10px;
+    }
+    .contract-terms h3 {
+      margin: 0 0 1rem 0;
+      font-size: 1.1rem;
+      color: #e84200;
+      font-weight: 600;
+    }
+    .contract-terms p {
+      margin: 0 0 0.75rem 0;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .contract-terms ul {
+      margin: 0 0 1rem 0;
+      padding-left: 1.5rem;
+    }
+    .contract-terms li {
+      margin-bottom: 0.6rem;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .contract-terms .terms-example {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #2c2c2e;
+      border-left: 3px solid #e84200;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
   </style>
 </head>
 <body>
@@ -434,6 +471,23 @@
         <li><strong>Contract Length:</strong> Longer per-unit contracts (1/3/5/10 year) reduce pricing</li>
       </ul>
       <p class="closing"><strong>The more you commit upfront, the more you save across the entire deal.</strong></p>
+    </div>
+
+    <div class="contract-terms">
+      <h3>Price Lock Guarantee</h3>
+      <p><strong>Your commitment:</strong> <span id="termsCommitment">240 units over 2 years (10 units/month)</span></p>
+      <p><strong>Your price stays locked when:</strong></p>
+      <ul>
+        <li>You maintain your monthly order rate (averaged over the last 3 calendar months), <strong>and</strong></li>
+        <li>You haven't yet reached your total committed units (<span id="termsMinUnits">240</span>)</li>
+      </ul>
+      <p><strong>What this means:</strong></p>
+      <ul>
+        <li>The price above is your ceiling — we never charge more, even if our rates increase.</li>
+        <li>Order extra units in any month without penalty — they get the same locked price.</li>
+        <li>Once you hit <span id="termsMinUnits2">240</span> total units, you've fulfilled your commitment.</li>
+      </ul>
+      <p class="terms-example" id="termsExample"><strong>Example:</strong> You commit to 10 units/month for 2 years (240 total). Your 3-month average stays at 10/month. In month 6, you order 15 units instead of 10. All 15 units get your locked price. As long as you keep averaging 10/month and haven't hit 240 total units yet, your price never increases.</p>
     </div>
 
     <div class="footer" id="footer"></div>
@@ -687,6 +741,26 @@
       }
       footerText += ' Committed rate sets the price ceiling, which then remains based on the size of the fleet currently under contract.';
       document.getElementById('footer').textContent = footerText;
+
+      // Update contract terms
+      const termsCommitment = document.getElementById('termsCommitment');
+      const termsMinUnits = document.getElementById('termsMinUnits');
+      const termsMinUnits2 = document.getElementById('termsMinUnits2');
+      const termsExample = document.getElementById('termsExample');
+      if (termsCommitment) {
+        termsCommitment.textContent = `${totalUnits} units over ${duration} years (${rate} units/month)`;
+      }
+      if (termsMinUnits) {
+        termsMinUnits.textContent = totalUnits;
+      }
+      if (termsMinUnits2) {
+        termsMinUnits2.textContent = totalUnits;
+      }
+      if (termsExample) {
+        const exampleExtra = Math.ceil(rate * 0.5);
+        const exampleTotal = rate + exampleExtra;
+        termsExample.innerHTML = `<strong>Example:</strong> You commit to ${rate} units/month for ${duration} years (${totalUnits} total). Your 3-month average stays at ${rate}/month. In month 6, you order ${exampleTotal} units instead of ${rate}. All ${exampleTotal} units get your locked price. As long as you keep averaging ${rate}/month and haven't hit ${totalUnits} total units yet, your price never increases.`;
+      }
     }
 
     // Contract button handlers
