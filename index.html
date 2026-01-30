@@ -251,8 +251,16 @@
       padding: 0.5rem 0.4rem;
     }
 
+    .fleet-tiers-table th:nth-child(n+2) {
+      text-align: right;
+    }
+
     .fleet-tiers-table td {
       padding: 0.5rem 0.4rem;
+    }
+
+    .fleet-tiers-table td:nth-child(n+2) {
+      text-align: right;
     }
 
     .fleet-tiers-table tr.current-tier {
@@ -672,7 +680,6 @@
           <tr>
             <th>Blended Units</th>
             <th>Volume Discount</th>
-            <th>Y1 Discount</th>
             <th>Example Y2+ Price</th>
           </tr>
         </thead>
@@ -887,17 +894,42 @@
 
       // Volume tiers table
       const volumeTbody = document.querySelector('#volumeTiersTable tbody');
+      const volumeTheadRow = document.querySelector('#volumeTiersTable thead tr');
       volumeTbody.innerHTML = '';
 
       const tiers = buildTierRanges();
-      const listY2Display = PRICING.displayListYear2(existingFleet);
+      const showY1Column = CONFIG.discounts.year1VolumeFactor > 0;
+
+      // Update table header based on whether Y1 discount exists
+      volumeTheadRow.innerHTML = `
+        <th>Blended Units</th>
+        <th>Volume Discount</th>
+        ${showY1Column ? '<th>Y1 Discount</th>' : ''}
+        <th>Example Y2+ Price</th>
+      `;
+
+      // Calculate components once for all tiers (same formula as year2PriceRaw)
+      const currentY2ListPrice = PRICING.year2ListPrice(rate, duration, selectedContract, existingFleet);
+      const contractDisc = PRICING.contractDiscount(selectedContract);
+      const license = PRICING.licensePriceYear2();
+      const shiftAddOn = PRICING.year1ShiftPerYear(rate, duration, selectedContract);
 
       tiers.forEach(tier => {
         const volumeDisc = PRICING.volumeDiscount(tier.min);
         const y1VolumeDisc = volumeDisc * CONFIG.discounts.year1VolumeFactor;
-        const contractDisc = PRICING.contractDiscount(selectedContract);
-        const exampleY2Price = PRICING.roundUp10(listY2Display * (1 - volumeDisc - contractDisc));
+
+        // Use the actual Y2+ price for the current tier, otherwise show example
+        let exampleY2Price;
         const isCurrent = discountUnits >= tier.min && discountUnits <= tier.max;
+        if (isCurrent) {
+          // For current tier, use the actual calculated price (includes minimum gap logic)
+          exampleY2Price = PRICING.year2Price(rate, duration, selectedContract, existingFleet);
+        } else {
+          // For other tiers, manually apply the same formula as year2PriceRaw
+          const totalDisc = volumeDisc + contractDisc;
+          const basePrice = PRICING.roundUp10(currentY2ListPrice * (1 - totalDisc));
+          exampleY2Price = PRICING.roundUp10(basePrice + license + shiftAddOn);
+        }
 
         const row = document.createElement('tr');
         if (isCurrent) row.classList.add('current-tier');
@@ -905,7 +937,7 @@
         row.innerHTML = `
           <td>${isCurrent ? '<span class="tier-marker">-></span> ' : ''}${tier.label}</td>
           <td>${Math.round(volumeDisc * 100)}%</td>
-          <td>${Math.round(y1VolumeDisc * 100)}%</td>
+          ${showY1Column ? `<td>${Math.round(y1VolumeDisc * 100)}%</td>` : ''}
           <td>${PRICING.formatCurrency(exampleY2Price)}/year</td>
         `;
         volumeTbody.appendChild(row);
