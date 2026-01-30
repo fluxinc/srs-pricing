@@ -162,6 +162,22 @@
     .lock-field button:hover { background: #3a3a3c; }
     .lock-error { margin-top: 0.5rem; color: #ff453a; font-size: 0.75rem; }
 
+    .lock-toggle {
+      border: 1px solid #3a3a3c;
+      background: #2c2c2e;
+      color: #f5f5f7;
+      border-radius: 8px;
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    .lock-toggle:hover { background: #3a3a3c; }
+    .lock-toggle svg { width: 18px; height: 18px; fill: currentColor; }
+    .lock-toggle.active { background: #e84200; border-color: #e84200; color: #1c1c1e; }
+
     .panel-grid { display: grid; gap: 0.6rem; }
     .panel-grid .table-container { margin-bottom: 0; }
 
@@ -525,11 +541,16 @@
     <div class="header">
       <img src="logo.png" alt="Flux" class="logo">
       <h1>Flux Mobile SRS Bridge Pricing <span class="internal-badge">INTERNAL</span></h1>
+      <button type="button" id="lockToggle" class="lock-toggle" data-lock-exempt aria-label="Unlock controls">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M17 9h-1V7a4 4 0 0 0-8 0v2H7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zm-7-2a2 2 0 1 1 4 0v2h-4V7zm7 11H7v-7h10v7z"/>
+        </svg>
+      </button>
     </div>
     <p class="subtitle">Cost breakdown, margins, and profitability analysis (2-layer discount model)</p>
     <div class="pin-hint">Tip: Alt+Click any input or panel to pin it while you edit. Panels also have a Pin button.</div>
 
-    <div id="lockOverlay" class="lock-overlay">
+    <div id="lockOverlay" class="lock-overlay hidden">
       <div class="lock-card">
         <div class="lock-title">Margin controls locked</div>
         <div class="lock-sub">Enter password to edit</div>
@@ -1325,11 +1346,15 @@
 
     function setLocked(locked) {
       document.body.classList.toggle('locked', locked);
-      const overlay = document.getElementById('lockOverlay');
-      if (overlay) overlay.classList.toggle('hidden', !locked);
+      const toggle = document.getElementById('lockToggle');
+      if (toggle) {
+        toggle.classList.toggle('active', !locked);
+        toggle.setAttribute('aria-label', locked ? 'Unlock controls' : 'Lock controls');
+      }
       const controls = document.querySelectorAll('input, button, select, textarea');
       controls.forEach(el => {
         if (el.closest('#lockOverlay')) return;
+        if (el.dataset.lockExempt !== undefined) return;
         if (locked) {
           el.dataset.wasDisabled = el.disabled ? '1' : '0';
           el.disabled = true;
@@ -1341,23 +1366,41 @@
       });
     }
 
+    function showLockOverlay() {
+      const overlay = document.getElementById('lockOverlay');
+      if (overlay) overlay.classList.remove('hidden');
+      const passwordInput = document.getElementById('lockPassword');
+      if (passwordInput) passwordInput.focus();
+    }
+
+    function hideLockOverlay() {
+      const overlay = document.getElementById('lockOverlay');
+      if (overlay) overlay.classList.add('hidden');
+      const errorEl = document.getElementById('lockError');
+      if (errorEl) errorEl.classList.add('hidden');
+    }
+
     function initLock() {
       const unlocked = sessionStorage.getItem(LOCK_KEY) === 'true';
       setLocked(!unlocked);
+      hideLockOverlay();
       const unlockButton = document.getElementById('unlockButton');
       const passwordInput = document.getElementById('lockPassword');
       const errorEl = document.getElementById('lockError');
+      const lockToggle = document.getElementById('lockToggle');
+
       function tryUnlock() {
         const value = passwordInput.value || '';
         if (value === LOCK_PASSWORD) {
           sessionStorage.setItem(LOCK_KEY, 'true');
           setLocked(false);
+          hideLockOverlay();
           passwordInput.value = '';
-          errorEl.classList.add('hidden');
           return;
         }
-        errorEl.classList.remove('hidden');
+        if (errorEl) errorEl.classList.remove('hidden');
       }
+
       if (unlockButton) {
         unlockButton.addEventListener('click', tryUnlock);
       }
@@ -1367,6 +1410,16 @@
             event.preventDefault();
             tryUnlock();
           }
+        });
+      }
+      if (lockToggle) {
+        lockToggle.addEventListener('click', () => {
+          if (document.body.classList.contains('locked')) {
+            showLockOverlay();
+            return;
+          }
+          sessionStorage.removeItem(LOCK_KEY);
+          setLocked(true);
         });
       }
     }
