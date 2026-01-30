@@ -665,7 +665,6 @@
           <td>
             <div class="price-main">${contractYrs > 1 ? PRICING.formatCurrency(y2) : '-'}</div>
             <div class="price-sub">${contractYrs > 1 ? (y2Disc > 0 ? Math.round(y2Disc * 100) + '% off' : '') : ''}</div>
-            ${contractYrs > 1 && y2Clamp > 0 ? `<div class="price-sub">min-gap +${PRICING.formatCurrency(y2Clamp)}</div>` : ''}
           </td>
           <td>
             <div class="price-main">${PRICING.formatCurrency(totalContract)}</div>
