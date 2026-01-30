@@ -377,6 +377,208 @@
       font-size: 0.85rem;
       line-height: 1.6;
     }
+
+    /* Hide print-only elements on screen */
+    .print-only {
+      display: none;
+    }
+
+    /* Print Styles - Quote Format */
+    @media print {
+      * {
+        border-radius: 0 !important;
+      }
+
+      body {
+        background: white;
+        color: black;
+        font-size: 11pt;
+        line-height: 1.4;
+      }
+
+      .container {
+        max-width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+
+      /* Show print-only elements */
+      .print-only {
+        display: block !important;
+      }
+
+      /* Hide interactive controls */
+      .controls,
+      .control-row,
+      .contract-buttons,
+      .pitch-section,
+      .fleet-tiers-table,
+      .footer,
+      .subtitle,
+      .discount-highlight,
+      .commitment-bar,
+      #priceChart {
+        display: none !important;
+      }
+
+      /* Quote summary */
+      .quote-summary {
+        background: white;
+        border: none;
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 1.25rem 0;
+        margin: 1.5rem 0;
+        page-break-inside: avoid;
+      }
+
+      .quote-summary h2 {
+        font-size: 13pt;
+        margin: 0 0 1rem 0;
+        color: #333;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(232, 66, 0, 0.15);
+        padding-bottom: 0.5rem;
+      }
+
+      .quote-details {
+        display: table;
+        width: 100%;
+      }
+
+      .quote-row {
+        display: table-row;
+      }
+
+      .quote-row:nth-child(even) {
+        background: rgba(232, 66, 0, 0.03);
+      }
+
+      .quote-label,
+      .quote-value {
+        display: table-cell;
+        padding: 0.5rem 0;
+      }
+
+      .quote-label {
+        font-weight: 500;
+        width: 40%;
+        color: #555;
+      }
+
+      .quote-value {
+        width: 60%;
+        color: #222;
+      }
+
+      /* Quote header */
+      .header {
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        font-size: 18pt;
+        color: #222;
+        margin: 0;
+        font-weight: 600;
+      }
+
+      .logo {
+        max-height: 40px;
+      }
+
+      /* Table container */
+      .table-container {
+        margin: 1.5rem 0;
+        border: none;
+        background: white;
+        padding: 0;
+      }
+
+      .table-title {
+        font-size: 11pt;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid rgba(232, 66, 0, 0.15);
+      }
+
+      /* Pricing table */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+        page-break-inside: avoid;
+        border: none;
+      }
+
+      table th {
+        background: rgba(232, 66, 0, 0.06);
+        font-weight: 600;
+        padding: 0.6rem 0.75rem;
+        text-align: left;
+        font-size: 10pt;
+        color: #333;
+        border: none;
+        border-bottom: 1px solid #ddd;
+      }
+
+      table td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        padding: 0.6rem 0.75rem;
+        text-align: left;
+        font-size: 10pt;
+        color: #222;
+      }
+
+      table tbody tr:nth-child(odd) {
+        background: rgba(232, 66, 0, 0.02);
+      }
+
+      table tbody tr:last-child td {
+        border-bottom: 1px solid #ddd;
+      }
+
+      /* Contract terms */
+      .contract-terms {
+        background: white;
+        border: none;
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+        padding: 1.25rem 0;
+        margin: 2rem 0;
+        page-break-inside: avoid;
+      }
+
+      .contract-terms h3 {
+        color: #333;
+        font-size: 12pt;
+        border-bottom: 1px solid rgba(232, 66, 0, 0.15);
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+
+      .contract-terms p,
+      .contract-terms li {
+        color: #222;
+        font-size: 10pt;
+      }
+
+      .contract-terms .terms-example {
+        background: rgba(232, 66, 0, 0.03);
+        border-left: 2px solid rgba(232, 66, 0, 0.3);
+        padding: 0.75rem;
+        margin-top: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -388,6 +590,28 @@
     <p class="subtitle">
       <span class="tagline">Installed-Base + Commitment Pricing: "Commit More, Save More"</span>
     </p>
+
+    <div class="quote-summary print-only">
+      <h2>Pricing Quote</h2>
+      <div class="quote-details">
+        <div class="quote-row">
+          <span class="quote-label">Commitment:</span>
+          <span class="quote-value" id="printCommitment">240 units over 2 years</span>
+        </div>
+        <div class="quote-row">
+          <span class="quote-label">Monthly Rate:</span>
+          <span class="quote-value" id="printRate">10 units/month</span>
+        </div>
+        <div class="quote-row">
+          <span class="quote-label">Contract Term:</span>
+          <span class="quote-value" id="printContract">5-year contract</span>
+        </div>
+        <div class="quote-row">
+          <span class="quote-label">Total Discount:</span>
+          <span class="quote-value" id="printDiscount">30% off Year 2+</span>
+        </div>
+      </div>
+    </div>
 
     <div class="commitment-bar">
       <span class="commitment-label">Total Commitment</span>
@@ -483,11 +707,11 @@
       </ul>
       <p><strong>What this means:</strong></p>
       <ul>
-        <li>The price above is your ceiling — we never charge more, even if our rates increase.</li>
+        <li>Units under this commitment maintain the pricing above for the contract term.</li>
         <li>Order extra units in any month without penalty — they get the same locked price.</li>
-        <li>Once you hit <span id="termsMinUnits2">240</span> total units, you've fulfilled your commitment.</li>
+        <li>Once you reach <span id="termsMinUnits2">240</span> total units, you've fulfilled your commitment. We'll work with you on renewal terms that make sense for both parties.</li>
       </ul>
-      <p class="terms-example" id="termsExample"><strong>Example:</strong> You commit to 10 units/month for 2 years (240 total). Your 3-month average stays at 10/month. In month 6, you order 15 units instead of 10. All 15 units get your locked price. As long as you keep averaging 10/month and haven't hit 240 total units yet, your price never increases.</p>
+      <p class="terms-example" id="termsExample"><strong>Example:</strong> You commit to 10 units/month for 2 years (240 total). Your 3-month average stays at 10/month. In month 6, you order 15 units instead of 10. All 15 units get your locked price. As long as you keep averaging 10/month and haven't hit 240 total units yet, your committed units maintain this pricing.</p>
     </div>
 
     <div class="footer" id="footer"></div>
@@ -759,7 +983,28 @@
       if (termsExample) {
         const exampleExtra = Math.ceil(rate * 0.5);
         const exampleTotal = rate + exampleExtra;
-        termsExample.innerHTML = `<strong>Example:</strong> You commit to ${rate} units/month for ${duration} years (${totalUnits} total). Your 3-month average stays at ${rate}/month. In month 6, you order ${exampleTotal} units instead of ${rate}. All ${exampleTotal} units get your locked price. As long as you keep averaging ${rate}/month and haven't hit ${totalUnits} total units yet, your price never increases.`;
+        termsExample.innerHTML = `<strong>Example:</strong> You commit to ${rate} units/month for ${duration} years (${totalUnits} total). Your 3-month average stays at ${rate}/month. In month 6, you order ${exampleTotal} units instead of ${rate}. All ${exampleTotal} units get your locked price. As long as you keep averaging ${rate}/month and haven't hit ${totalUnits} total units yet, your committed units maintain this pricing.`;
+      }
+
+      // Update print-only quote summary
+      const printCommitment = document.getElementById('printCommitment');
+      const printRate = document.getElementById('printRate');
+      const printContract = document.getElementById('printContract');
+      const printDiscount = document.getElementById('printDiscount');
+      if (printCommitment) {
+        printCommitment.textContent = `${totalUnits} units over ${duration} years`;
+      }
+      if (printRate) {
+        printRate.textContent = `${rate} units/month`;
+      }
+      if (printContract) {
+        printContract.textContent = `${selectedContract}-year contract`;
+      }
+      if (printDiscount) {
+        const y2ListDisplay = PRICING.displayListYear2(existingFleet);
+        const y2Price = PRICING.year2Price(rate, duration, selectedContract, existingFleet);
+        const y2Disc = selectedContract > 1 && y2ListDisplay > 0 ? Math.max(0, 1 - (y2Price / y2ListDisplay)) : 0;
+        printDiscount.textContent = `${Math.round(y2Disc * 100)}% off Year 2+`;
       }
     }
 
