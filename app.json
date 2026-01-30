@@ -1,0 +1,8 @@
+{
+  "name": "srs-pricing",
+  "scripts": {
+    "dokku": {
+      "predeploy": "node scripts/clear-state.js"
+    }
+  }
+}

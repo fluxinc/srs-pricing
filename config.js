@@ -41,7 +41,7 @@ const CONFIG = {
   // ============================================================
   efficiency: {
     supportDecayRate: 0.90,       // 10% improvement per year
-    supportFloor: 0.63,           // Floor at 63% (≈5 hrs minimum from 8 base)
+    supportFloor: 0.50,           // Floor at 50% (4 hrs minimum from 8 base)
   },
 
   // ============================================================
@@ -65,7 +65,7 @@ const CONFIG = {
   // PRICING CONTROLS
   // ============================================================
   pricing: {
-    year1FixedPrice: 2400,           // Fixed Year 1 base price (before discounts, excl. license)
+    year1FixedPrice: 3000,           // Fixed Year 1 base price (before discounts, excl. license)
     year1ShiftFactor: 0.0,           // Share of Y1 base shifted into later years
     listPriceYear1: 4300,            // List price for discount labels (fixed reference)
     listPriceYear2: 1600,            // List price for discount labels (fixed reference)
@@ -93,7 +93,7 @@ const CONFIG = {
     ],
 
     // Year 1 gets reduced volume discount
-    year1VolumeFactor: 0.5,           // Y1 gets 50% of the volume discount
+    year1VolumeFactor: 0.0,           // Y1 gets 0% of the volume discount
 
     // Blend between annual rate and total commitment for discount basis
     // 0.0 = annual units only, 1.0 = total commitment (rate * years)
