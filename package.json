@@ -6,7 +6,11 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "check:public": "node scripts/sample-public-display.js --series",
+    "check:public:issues": "node scripts/sample-public-display.js --series --issues",
+    "check:public:table": "node scripts/sample-public-display.js --table --series",
+    "check:public:grid": "node scripts/sample-public-display.js --grid --contracts all --table --series --ui"
   },
   "engines": {
     "node": ">=18"

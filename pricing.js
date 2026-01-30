@@ -145,6 +145,9 @@ const PRICING = {
 
   overheadBlended(contractYears, monthlyRate, commitYears, existingFleetUnits) {
     const base = this.overheadBlendedBase(contractYears, monthlyRate, commitYears, existingFleetUnits);
+    if (CONFIG.pricing && CONFIG.pricing.overheadCreditEnabled === false) {
+      return base;
+    }
     if (contractYears <= 1) return base;
     const y1Price = this.year1Price(monthlyRate, commitYears, contractYears, existingFleetUnits);
     const y1Cost = this.year1Cost(monthlyRate, commitYears, existingFleetUnits);
@@ -167,35 +170,106 @@ const PRICING = {
    * Volume discount based on total units committed
    */
   volumeDiscount(totalUnits) {
-    for (const tier of CONFIG.discounts.volumeTiers) {
-      if (totalUnits >= tier.minUnits) return tier.discount;
+    const units = Number.isFinite(totalUnits) ? Math.max(0, totalUnits) : 0;
+    const tiers = this.normalizeVolumeTiers();
+    if (!tiers.length) return 0;
+
+    if (units <= tiers[0].minUnits) {
+      return this.clamp01(tiers[0].discount);
     }
-    return 0;
+
+    for (let i = 0; i < tiers.length - 1; i++) {
+      const lower = tiers[i];
+      const upper = tiers[i + 1];
+      if (units >= lower.minUnits && units <= upper.minUnits) {
+        const span = upper.minUnits - lower.minUnits;
+        if (span <= 0) return this.clamp01(upper.discount);
+        const t = (units - lower.minUnits) / span;
+        const discount = lower.discount + (upper.discount - lower.discount) * t;
+        return this.clamp01(discount);
+      }
+    }
+
+    return this.clamp01(tiers[tiers.length - 1].discount);
   },
 
   /**
    * Get the current volume tier info
    */
   getVolumeTier(totalUnits) {
-    for (const tier of CONFIG.discounts.volumeTiers) {
-      if (totalUnits >= tier.minUnits) {
-        return { minUnits: tier.minUnits, discount: tier.discount };
+    const units = Number.isFinite(totalUnits) ? Math.max(0, totalUnits) : 0;
+    const tiers = this.normalizeVolumeTiers();
+    if (!tiers.length) return { minUnits: 0, maxUnits: Infinity, discount: 0 };
+
+    for (let i = 0; i < tiers.length - 1; i++) {
+      const current = tiers[i];
+      const next = tiers[i + 1];
+      if (units >= current.minUnits && units < next.minUnits) {
+        return {
+          minUnits: current.minUnits,
+          maxUnits: next.minUnits - 1,
+          discount: this.volumeDiscount(units),
+        };
       }
     }
-    return { minUnits: 0, discount: 0 };
+
+    const last = tiers[tiers.length - 1];
+    return { minUnits: last.minUnits, maxUnits: Infinity, discount: this.volumeDiscount(units) };
   },
 
   /**
    * Get the next volume tier
    */
   getNextVolumeTier(totalUnits) {
-    const tiers = CONFIG.discounts.volumeTiers;
-    for (let i = tiers.length - 1; i >= 0; i--) {
-      if (totalUnits < tiers[i].minUnits) {
-        return { minUnits: tiers[i].minUnits, discount: tiers[i].discount };
+    const units = Number.isFinite(totalUnits) ? Math.max(0, totalUnits) : 0;
+    const tiers = this.normalizeVolumeTiers();
+    for (const tier of tiers) {
+      if (units < tier.minUnits) {
+        return { minUnits: tier.minUnits, discount: tier.discount };
       }
     }
-    return null; // Already at max tier
+    return null;
+  },
+
+  normalizeVolumeTiers() {
+    const raw = (CONFIG.discounts && Array.isArray(CONFIG.discounts.volumeTiers))
+      ? CONFIG.discounts.volumeTiers
+      : [];
+    const cleaned = raw
+      .map((tier) => {
+        const minUnits = Number(tier.minUnits);
+        const discount = Number(tier.discount);
+        if (!Number.isFinite(minUnits) || !Number.isFinite(discount)) return null;
+        return {
+          minUnits: Math.max(0, Math.round(minUnits)),
+          discount: this.clamp01(discount),
+        };
+      })
+      .filter(Boolean);
+
+    if (!cleaned.some((tier) => tier.minUnits === 0)) {
+      cleaned.push({ minUnits: 0, discount: 0 });
+    }
+
+    cleaned.sort((a, b) => a.minUnits - b.minUnits);
+
+    const deduped = [];
+    for (const tier of cleaned) {
+      const last = deduped[deduped.length - 1];
+      if (last && last.minUnits === tier.minUnits) {
+        last.discount = Math.max(last.discount, tier.discount);
+      } else {
+        deduped.push({ ...tier });
+      }
+    }
+
+    let prev = 0;
+    for (const tier of deduped) {
+      if (tier.discount < prev) tier.discount = prev;
+      prev = tier.discount;
+    }
+
+    return deduped;
   },
 
   /**
@@ -209,14 +283,69 @@ const PRICING = {
   // PRICE CALCULATIONS
   // ============================================================
 
+  clamp01(value) {
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.min(1, value));
+  },
+
+  licenseListYear1() {
+    const list = (CONFIG.licensing && Number.isFinite(CONFIG.licensing.year1List))
+      ? CONFIG.licensing.year1List
+      : (CONFIG.licensing && Number.isFinite(CONFIG.licensing.year1) ? CONFIG.licensing.year1 : 0);
+    return Number.isFinite(list) ? list : 0;
+  },
+
+  licenseListYear2() {
+    const list = (CONFIG.licensing && Number.isFinite(CONFIG.licensing.year2List))
+      ? CONFIG.licensing.year2List
+      : (CONFIG.licensing && Number.isFinite(CONFIG.licensing.year2Plus) ? CONFIG.licensing.year2Plus : 0);
+    return Number.isFinite(list) ? list : 0;
+  },
+
+  licenseDiscountYear1() {
+    return this.clamp01(CONFIG.licensing && Number.isFinite(CONFIG.licensing.year1Discount)
+      ? CONFIG.licensing.year1Discount
+      : 0);
+  },
+
+  licenseDiscountYear2() {
+    return this.clamp01(CONFIG.licensing && Number.isFinite(CONFIG.licensing.year2Discount)
+      ? CONFIG.licensing.year2Discount
+      : 0);
+  },
+
+  licensePriceYear1() {
+    return this.licenseListYear1() * (1 - this.licenseDiscountYear1());
+  },
+
+  licensePriceYear2() {
+    return this.licenseListYear2() * (1 - this.licenseDiscountYear2());
+  },
+
   year1ListPrice(monthlyRate, commitYears, contractYears, existingFleetUnits) {
     return CONFIG.pricing.year1FixedPrice;
+  },
+
+  displayListYear1() {
+    const list = CONFIG.pricing && Number.isFinite(CONFIG.pricing.listPriceYear1)
+      ? CONFIG.pricing.listPriceYear1
+      : 0;
+    if (list > 0) return list;
+    return CONFIG.pricing.year1FixedPrice + this.licenseListYear1();
+  },
+
+  displayListYear2(existingFleetUnits) {
+    const list = CONFIG.pricing && Number.isFinite(CONFIG.pricing.listPriceYear2)
+      ? CONFIG.pricing.listPriceYear2
+      : 0;
+    if (list > 0) return list;
+    return this.year2ListPrice(10, 1, CONFIG.pricing.year2BaselineYears || 10, existingFleetUnits) + this.licenseListYear2();
   },
 
   year1BasePrice(monthlyRate, commitYears) {
     const discountUnits = this.discountBasisUnits(monthlyRate, commitYears);
     const volumeDisc = this.volumeDiscount(discountUnits) * CONFIG.discounts.year1VolumeFactor;
-    return this.roundUp50(CONFIG.pricing.year1FixedPrice * (1 - volumeDisc));
+    return this.roundUp10(CONFIG.pricing.year1FixedPrice * (1 - volumeDisc));
   },
 
   year1ShiftAmount(monthlyRate, commitYears) {
@@ -237,9 +366,7 @@ const PRICING = {
     const overhead = this.overheadBlended(baselineYears, monthlyRate, commitYears, existingFleetUnits);
     const minNetPrice = (cost + overhead) * (1 + CONFIG.pricing.margins.year2Plus);
 
-    const discountUnits = this.discountBasisUnits(monthlyRate, commitYears);
-    const volumeDisc = this.volumeDiscount(discountUnits);
-    const baselineDisc = volumeDisc + this.contractDiscount(baselineYears);
+    const baselineDisc = this.contractDiscount(baselineYears);
     const denom = Math.max(0.01, 1 - baselineDisc);
     return minNetPrice / denom;
   },
@@ -250,8 +377,8 @@ const PRICING = {
     const volumeDisc = this.volumeDiscount(discountUnits);
     const contractDisc = this.contractDiscount(contractYears);
     const totalDisc = volumeDisc + contractDisc;
-    const basePrice = this.roundUp50(listPrice * (1 - totalDisc));
-    const license = CONFIG.licensing.year2Plus || 0;
+    const basePrice = this.roundUp10(listPrice * (1 - totalDisc));
+    const license = this.licensePriceYear2();
     const shiftAddOn = this.year1ShiftPerYear(monthlyRate, commitYears, contractYears);
     return basePrice + license + shiftAddOn;
   },
@@ -264,8 +391,8 @@ const PRICING = {
     const basePrice = this.year1BasePrice(monthlyRate, commitYears);
     const shiftAmount = this.year1ShiftAmount(monthlyRate, commitYears);
     const shiftedPrice = Math.max(0, basePrice - shiftAmount);
-    const license = CONFIG.licensing.year1 || 0;
-    return this.roundUp50(shiftedPrice + license);
+    const license = this.licensePriceYear1();
+    return this.roundUp10(shiftedPrice + license);
   },
 
   /**
@@ -286,7 +413,7 @@ const PRICING = {
     const rawPrice = this.year2PriceRaw(monthlyRate, commitYears, contractYears, existingFleetUnits);
 
     if (minGap <= 0) {
-      return this.roundUp50(rawPrice);
+      return this.roundUp10(rawPrice);
     }
 
     const terms = Object.keys(CONFIG.contractDiscounts)
@@ -295,7 +422,7 @@ const PRICING = {
       .sort((a, b) => a - b);
 
     if (!terms.includes(contractYears)) {
-      return this.roundUp50(rawPrice);
+      return this.roundUp10(rawPrice);
     }
 
     const rawByTerm = new Map();
@@ -313,7 +440,7 @@ const PRICING = {
       prevAdjusted = adjusted;
     }
 
-    return this.roundUp50(adjustedByTerm[contractYears]);
+    return this.roundUp10(adjustedByTerm[contractYears]);
   },
 
   /**
@@ -387,8 +514,8 @@ const PRICING = {
       discountUnits: discountUnits,
       overheadY1: overheadY1,
       overheadY2: overheadY2,
-      listY1: this.year1ListPrice(monthlyRate, commitYears, contractYears, existingFleetUnits),
-      listY2: this.year2ListPrice(monthlyRate, commitYears, contractYears, existingFleetUnits),
+      listY1: this.displayListYear1(),
+      listY2: this.displayListYear2(existingFleetUnits),
     };
   },
 
@@ -396,12 +523,12 @@ const PRICING = {
   // UTILITIES
   // ============================================================
 
-  roundUp50(value) {
-    return Math.ceil(value / 20) * 20;
+  roundUp10(value) {
+    return Math.ceil(value / 10) * 10;
   },
 
   formatCurrency(value) {
-    return '$' + this.roundUp50(value).toLocaleString();
+    return '$' + this.roundUp10(value).toLocaleString();
   },
 
   formatPercent(value) {

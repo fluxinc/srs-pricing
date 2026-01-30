@@ -18,8 +18,10 @@ const CONFIG = {
   // SOFTWARE LICENSING (REVENUE)
   // ============================================================
   licensing: {
-    year1: 1900,                      // First-year license price (per unit)
-    year2Plus: 290,                   // Annual license price (per unit)
+    year1List: 1900,                  // First-year license list price (per unit)
+    year2List: 190,                   // Annual license list price (per unit)
+    year1Discount: 0.0,               // First-year license discount
+    year2Discount: 0.0,               // Year 2+ license maintenance discount
   },
 
   // ============================================================
@@ -39,7 +41,7 @@ const CONFIG = {
   // ============================================================
   efficiency: {
     supportDecayRate: 0.90,       // 10% improvement per year
-    supportFloor: 0.625,          // Floor at 62.5% (5 hrs minimum from 8 base)
+    supportFloor: 0.63,           // Floor at 63% (≈5 hrs minimum from 8 base)
   },
 
   // ============================================================
@@ -65,10 +67,13 @@ const CONFIG = {
   pricing: {
     year1FixedPrice: 2400,           // Fixed Year 1 base price (before discounts, excl. license)
     year1ShiftFactor: 0.0,           // Share of Y1 base shifted into later years
+    listPriceYear1: 4300,            // List price for discount labels (fixed reference)
+    listPriceYear2: 1600,            // List price for discount labels (fixed reference)
     margins: {
       year2Plus: 0.20,               // Resale margin
     },
     overheadYear1Factor: 0.0,        // 0 = exclude overhead in Y1, 1 = full overhead
+    overheadCreditEnabled: false,    // Allow Y1 surplus to offset Y2+ overhead
     overheadCreditYears: 4,          // Cap Y1 surplus amortization across Y2+ years
     year2BaselineYears: 10,          // Longest term used to set Y2+ minimum price
     year2MinGap: 20,                 // Minimum Y2+ per-year gap between contract lengths
@@ -79,7 +84,7 @@ const CONFIG = {
   // Based on total units committed = rate × 12 × duration
   // ============================================================
   discounts: {
-    // Volume commitment tiers (sorted descending by minUnits)
+    // Volume commitment curve control points (order doesn't matter)
     volumeTiers: [
       { minUnits: 500, discount: 0.25 },  // 500+ units: 25% off
       { minUnits: 360, discount: 0.20 },  // 360-499 units: 20% off

@@ -40,12 +40,9 @@ function pct(value) {
 
 function volumeTier(totalUnits) {
   const tier = PRICING.getVolumeTier(totalUnits);
-  if (tier.minUnits === 0) return '0-119';
-  if (tier.minUnits === 120) return '120-239';
-  if (tier.minUnits === 240) return '240-359';
-  if (tier.minUnits === 360) return '360-499';
-  if (tier.minUnits === 500) return '500+';
-  return tier.minUnits + '+';
+  if (!tier) return '0+';
+  if (!Number.isFinite(tier.maxUnits)) return `${tier.minUnits}+`;
+  return `${tier.minUnits}-${tier.maxUnits}`;
 }
 
 console.log('Installed-Base Pricing Calibration');

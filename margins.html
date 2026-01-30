@@ -53,13 +53,9 @@
 
     .control-row {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1rem;
-      margin-bottom: 0.75rem;
     }
-
-    .control-row:last-child { margin-bottom: 0; }
-    .control-row.spaced { margin-top: 1rem; }
 
     label { display: block; font-weight: 500; margin-bottom: 0.35rem; font-size: 0.75rem; }
     .commitment-value { color: #e84200; font-weight: 600; }
@@ -102,7 +98,7 @@
     .stack .table-container { margin-bottom: 0; }
     .pricing-grid { align-items: start; }
 
-    @media (max-width: 640px) {
+    @media (max-width: 900px) {
       .control-row { grid-template-columns: 1fr; gap: 1rem; }
     }
 
@@ -112,6 +108,11 @@
       padding: 0.75rem;
       border: 1px solid #2c2c2e;
       position: relative;
+    }
+
+    .panel.lever-panel {
+      border-color: rgba(232, 66, 0, 0.35);
+      box-shadow: inset 0 0 0 1px rgba(232, 66, 0, 0.08);
     }
 
     .panel-grid { display: grid; gap: 0.6rem; }
@@ -207,7 +208,7 @@
     code { background: #2c2c2e; padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.85em; }
     .faint { color: #6f6f73; font-weight: 500; }
 
-    .contract-buttons { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .contract-buttons { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.4rem; }
     .contract-btn {
       background: #2c2c2e;
       border: 1px solid #3a3a3c;
@@ -239,6 +240,33 @@
       grid-template-columns: 1fr auto;
       align-items: center;
       gap: 0.25rem 0.6rem;
+    }
+
+    .config-note {
+      font-size: 0.7rem;
+      color: #9b9ba0;
+      margin-bottom: 0.5rem;
+    }
+
+    .config-item.lever {
+      border-radius: 10px;
+      padding: 0.5rem 0.6rem;
+      border: 1px solid rgba(232, 66, 0, 0.35);
+      background: rgba(232, 66, 0, 0.08);
+    }
+
+    .config-item.lever label::after {
+      content: " • lever";
+      color: #e84200;
+      font-size: 0.62rem;
+      font-weight: 600;
+    }
+
+    .config-item.assumption {
+      border-radius: 10px;
+      padding: 0.5rem 0.6rem;
+      border: 1px solid #2a2a2c;
+      background: #151517;
     }
 
     .config-item.is-disconnected { display: none; }
@@ -376,13 +404,34 @@
       font-size: 0.75rem;
     }
 
+    @media (max-width: 640px) {
+      .contract-buttons { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
     @media (max-width: 400px) {
-      .contract-buttons { gap: 0.4rem; }
       .contract-btn { padding: 0.3rem 0.5rem; font-size: 0.7rem; min-width: 50px; }
       .config-list { grid-template-columns: 1fr; }
       .config-input input[type="number"] { width: 100%; }
       .config-input input[type="range"] { width: 100%; }
     }
+
+    .commitment-bar {
+      position: sticky;
+      top: 0.5rem;
+      z-index: 20;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.45rem 0.7rem;
+      margin: 0.5rem 0 0.75rem;
+      background: #1c1c1e;
+      border: 1px solid #2c2c2e;
+      border-radius: 10px;
+      font-size: 0.8rem;
+    }
+    .commitment-bar .commitment-label { color: #86868b; }
 
     /* Desktop breakpoint - restore larger sizes */
     @media (min-width: 641px) {
@@ -426,6 +475,13 @@
     <p class="subtitle">Cost breakdown, margins, and profitability analysis (2-layer discount model)</p>
     <div class="pin-hint">Tip: Alt+Click any input or panel to pin it while you edit. Panels also have a Pin button.</div>
 
+    <div class="commitment-bar">
+      <span class="commitment-label">Total Commitment</span>
+      <span id="totalCommitment" class="commitment-value">480 units</span>
+      <span class="commitment-label">Blended Basis</span>
+      <span id="discountCommitment" class="commitment-value">480 units</span>
+    </div>
+
     <div id="pinnedBar" class="pinned-bar hidden">
       <div id="pinnedInputsSection" class="pinned-section hidden">
         <div class="pinned-title">Pinned Inputs</div>
@@ -453,40 +509,33 @@
             <span class="slider-value"><span id="durationValue">4</span> yr</span>
           </div>
         </div>
-      </div>
-      <div class="control-row spaced">
-        <div>
-          <label>Existing Fleet (installed units)</label>
-          <div class="slider-container">
-            <input type="range" id="fleetSlider" min="0" max="1000" step="50" value="0" aria-label="Existing fleet size">
-            <span class="slider-value"><span id="fleetValue">0</span> units</span>
-          </div>
-        </div>
         <div>
           <label>Contract Package</label>
           <div class="contract-buttons" id="contractButtons"></div>
         </div>
       </div>
-      <div class="control-row spaced">
-        <div>
-          <label>Total Commitment (actual): <span id="totalCommitment" class="commitment-value">480 units</span></label>
-          <div class="config-help">Discount basis (blended): <span id="discountCommitment">480 units</span></div>
-        </div>
-      </div>
     </div>
 
     <div class="grid">
-      <div class="panel">
-        <h2>Pricing & Overhead</h2>
+      <div class="panel lever-panel">
+        <h2>Pricing Levers</h2>
+        <div class="config-note">Pricing, discounts, allocations, and license levers. Adjust freely.</div>
         <div class="config-list">
-          <div class="config-item">
+          <div class="config-item lever">
             <label>Year 1 Base Price</label>
             <div class="config-input">
               <input type="number" min="0" step="50" data-path="pricing.year1FixedPrice">
             </div>
             <div class="config-help">Fixed Year 1 base price before volume discount (license added separately).</div>
           </div>
-          <div class="config-item">
+          <div class="config-item lever">
+            <label>List Price (Year 1)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="50" data-path="pricing.listPriceYear1">
+            </div>
+            <div class="config-help">Fixed reference for discount labels only.</div>
+          </div>
+          <div class="config-item lever">
             <label>Y1 Shift to Later Years <span id="y1ShiftValue">0%</span></label>
             <div class="config-input">
               <input type="range" min="0" max="100" step="5" value="0"
@@ -494,7 +543,7 @@
             </div>
             <div class="config-help">Moves a share of the Year 1 base price into Years 2+ (spread evenly).</div>
           </div>
-          <div class="config-item">
+          <div class="config-item lever">
             <label>Year 2+ Margin <span id="marginY2Value">35%</span></label>
             <div class="config-input">
               <input type="range" id="marginY2Slider" min="0" max="80" step="1" value="35"
@@ -502,21 +551,28 @@
             </div>
             <div class="config-help">Target margin applied to Year 2+ list price before discounts.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item lever">
+            <label>List Price (Year 2+)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="10" data-path="pricing.listPriceYear2">
+            </div>
+            <div class="config-help">Fixed reference for discount labels only.</div>
+          </div>
+          <div class="config-item lever">
             <label>Y2+ Baseline Term (years)</label>
             <div class="config-input">
               <input type="number" min="2" max="20" step="1" data-path="pricing.year2BaselineYears" data-type="int">
             </div>
             <div class="config-help">Longest term used to set the minimum Year 2+ price.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item lever">
             <label>Y2+ Min Gap per Year ($)</label>
             <div class="config-input">
               <input type="number" min="0" step="10" data-path="pricing.year2MinGap">
             </div>
             <div class="config-help">Minimum per-year price gap between 10-year, 5-year, and 3-year.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item lever">
             <label>Year 1 Overhead Factor <span id="overheadFactorValue">0%</span></label>
             <div class="config-input">
               <input type="range" id="overheadFactorSlider" min="0" max="100" step="5" value="0"
@@ -524,14 +580,116 @@
             </div>
             <div class="config-help">Portion of annual overhead included in Year 1 cost (0% = excluded).</div>
           </div>
-          <div class="config-item">
+          <div class="config-item lever">
+            <label>Offset Y2+ Overhead with Y1 Surplus</label>
+            <div class="config-input">
+              <input type="checkbox" data-path="pricing.overheadCreditEnabled" data-type="bool">
+            </div>
+            <div class="config-help">If enabled, Year 1 surplus reduces Y2+ overhead (can drive overhead to $0).</div>
+          </div>
+          <div class="config-item lever">
+            <label>License List (Year 1)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="10" data-path="licensing.year1List">
+            </div>
+            <div class="config-help">List license revenue before any discount (Year 1).</div>
+          </div>
+          <div class="config-item lever">
+            <label>License Discount (Year 1) <span id="licenseY1DiscountValue">0%</span></label>
+            <div class="config-input">
+              <input type="range" min="0" max="100" step="1" value="0"
+                     data-path="licensing.year1Discount" data-scale="0.01" data-display="licenseY1DiscountValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Discount applied to the Year 1 license list price.</div>
+          </div>
+          <div class="config-item lever">
+            <label>License List (Year 2+)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="10" data-path="licensing.year2List">
+            </div>
+            <div class="config-help">Annual license maintenance list price (unsupported baseline).</div>
+          </div>
+          <div class="config-item lever">
+            <label>License Maintenance Discount (Year 2+) <span id="licenseY2DiscountValue">0%</span></label>
+            <div class="config-input">
+              <input type="range" min="0" max="100" step="1" value="0"
+                     data-path="licensing.year2Discount" data-scale="0.01" data-display="licenseY2DiscountValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Discount applied to the Year 2+ maintenance list price.</div>
+          </div>
+          <div class="config-item lever">
+            <label>Year 1 Volume Discount Factor <span id="y1VolumeFactorValue">50%</span></label>
+            <div class="config-input">
+              <input type="range" min="0" max="100" step="5" value="50"
+                     data-path="discounts.year1VolumeFactor" data-scale="0.01" data-display="y1VolumeFactorValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Year 1 gets this portion of the volume discount.</div>
+          </div>
+          <div class="config-item lever">
+            <label>Volume Duration Weight <span id="volumeDurationWeightValue">25%</span></label>
+            <div class="config-input">
+              <input type="range" min="0" max="100" step="5" value="25"
+                     data-path="discounts.volumeDurationWeight" data-scale="0.01" data-display="volumeDurationWeightValue" data-display-format="percent">
+            </div>
+            <div class="config-help">Blends annual rate vs total commitment for volume tiers (0% = rate-only).</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Cost Assumptions (Labor & Overhead)</h2>
+        <div class="config-note">People costs and overhead. Treat as fixed until assumptions change.</div>
+        <div class="config-list">
+          <div class="config-item assumption">
+            <label>Hourly Rate ($/hr)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="1" data-path="labor.hourlyRate">
+            </div>
+            <div class="config-help">Applied to build, support, and coordination hours.</div>
+          </div>
+          <div class="config-item assumption">
+            <label>Build Hours (per unit)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.5" data-path="labor.buildHoursPerUnit">
+            </div>
+            <div class="config-help">One-time build effort for each unit.</div>
+          </div>
+          <div class="config-item assumption">
+            <label>Support Hours (per unit/year)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.5" data-path="labor.supportHoursPerUnitYear">
+            </div>
+            <div class="config-help">Baseline annual support hours before efficiency scaling.</div>
+          </div>
+          <div class="config-item assumption">
+            <label>Coordination Hours (per unit)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="0.5" data-path="labor.coordinationHoursPerUnit">
+            </div>
+            <div class="config-help">One-time coordination effort for each unit.</div>
+          </div>
+          <div class="config-item assumption">
+            <label>FTE Salary ($/yr)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="1000" data-path="labor.fteSalary">
+            </div>
+            <div class="config-help">Used for overhead cost modeling.</div>
+          </div>
+          <div class="config-item assumption is-disconnected">
+            <label>FTE Hours (per year)</label>
+            <div class="config-input">
+              <input type="number" min="0" step="50" data-path="labor.fteHoursPerYear" disabled>
+            </div>
+            <div class="config-help">Used to estimate support FTE needs.</div>
+          </div>
+          <div class="config-item assumption">
             <label>Dev/Maintenance FTEs</label>
             <div class="config-input">
               <input type="number" min="0" step="0.1" data-path="overhead.devMaintenanceFTEs">
             </div>
             <div class="config-help">Annual overhead headcount allocated across the installed base.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Additional Annual Overhead ($)</label>
             <div class="config-input">
               <input type="number" min="0" step="100" data-path="overhead.additionalAnnualCost">
@@ -540,103 +698,42 @@
           </div>
         </div>
       </div>
-
-      <div class="panel">
-        <h2>Labor & Licensing</h2>
-        <div class="config-list">
-          <div class="config-item">
-            <label>Hourly Rate ($/hr)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="1" data-path="labor.hourlyRate">
-            </div>
-            <div class="config-help">Applied to build, support, and coordination hours.</div>
-          </div>
-          <div class="config-item">
-            <label>Build Hours (per unit)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="0.5" data-path="labor.buildHoursPerUnit">
-            </div>
-            <div class="config-help">One-time build effort for each unit.</div>
-          </div>
-          <div class="config-item">
-            <label>Support Hours (per unit/year)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="0.5" data-path="labor.supportHoursPerUnitYear">
-            </div>
-            <div class="config-help">Baseline annual support hours before efficiency scaling.</div>
-          </div>
-          <div class="config-item">
-            <label>Coordination Hours (per unit)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="0.5" data-path="labor.coordinationHoursPerUnit">
-            </div>
-            <div class="config-help">One-time coordination effort for each unit.</div>
-          </div>
-          <div class="config-item">
-            <label>License Price (Year 1)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="10" data-path="licensing.year1">
-            </div>
-            <div class="config-help">Per-unit license revenue added on top of discounted pricing.</div>
-          </div>
-          <div class="config-item">
-            <label>License Price (Year 2+)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="10" data-path="licensing.year2Plus">
-            </div>
-            <div class="config-help">Annual per-unit license revenue added on top of discounted pricing.</div>
-          </div>
-          <div class="config-item">
-            <label>FTE Salary ($/yr)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="1000" data-path="labor.fteSalary">
-            </div>
-            <div class="config-help">Used for overhead cost modeling.</div>
-          </div>
-          <div class="config-item is-disconnected">
-            <label>FTE Hours (per year)</label>
-            <div class="config-input">
-              <input type="number" min="0" step="50" data-path="labor.fteHoursPerYear" disabled>
-            </div>
-            <div class="config-help">Used to estimate support FTE needs.</div>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div class="grid">
       <div class="panel">
         <h2>Hardware & Scale</h2>
+        <div class="config-note">Hardware costs and scale efficiency assumptions.</div>
         <div class="config-list">
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Hardware Cost (per unit)</label>
             <div class="config-input">
               <input type="number" min="0" step="50" data-path="hardware.fluxBox">
             </div>
             <div class="config-help">Hardware bill of materials per unit.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Replacement Cycle (years)</label>
             <div class="config-input">
               <input type="number" min="1" step="1" data-path="hardware.replacementCycleYears" data-type="int">
             </div>
             <div class="config-help">Hardware reserve = cost / replacement cycle.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Scale Reference (units)</label>
             <div class="config-input">
               <input type="number" min="1" step="10" data-path="scaleEfficiency.scaleRefUnits" data-type="int">
             </div>
             <div class="config-help">Installed-base size where scale savings begin.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Scale Slope</label>
             <div class="config-input">
               <input type="number" min="0" step="0.05" data-path="scaleEfficiency.scaleSlope">
             </div>
             <div class="config-help">Higher values mean faster efficiency gains with scale.</div>
           </div>
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Scale Floor <span id="scaleFloorValue">60%</span></label>
             <div class="config-input">
               <input type="range" min="20" max="100" step="1" value="60"
@@ -648,9 +745,10 @@
       </div>
 
       <div class="panel">
-        <h2>Time Efficiency</h2>
+        <h2>Support Efficiency</h2>
+        <div class="config-note">Assumptions about support time reductions over years.</div>
         <div class="config-list">
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Support Decay Rate <span id="supportDecayValue">90%</span></label>
             <div class="config-input">
               <input type="range" min="70" max="100" step="1" value="90"
@@ -658,7 +756,7 @@
             </div>
             <div class="config-help">Year-over-year efficiency improvement (1.0 = no improvement).</div>
           </div>
-          <div class="config-item">
+          <div class="config-item assumption">
             <label>Support Floor <span id="supportFloorValue">63%</span></label>
             <div class="config-input">
               <input type="range" min="20" max="100" step="1" value="63"
@@ -666,28 +764,13 @@
             </div>
             <div class="config-help">Minimum support-hours factor after decay.</div>
           </div>
-          <div class="config-item">
-            <label>Year 1 Volume Discount Factor <span id="y1VolumeFactorValue">50%</span></label>
-            <div class="config-input">
-              <input type="range" min="0" max="100" step="5" value="50"
-                     data-path="discounts.year1VolumeFactor" data-scale="0.01" data-display="y1VolumeFactorValue" data-display-format="percent">
-            </div>
-            <div class="config-help">Year 1 gets this portion of the volume discount.</div>
-          </div>
-          <div class="config-item">
-            <label>Volume Duration Weight <span id="volumeDurationWeightValue">25%</span></label>
-            <div class="config-input">
-              <input type="range" min="0" max="100" step="5" value="25"
-                     data-path="discounts.volumeDurationWeight" data-scale="0.01" data-display="volumeDurationWeightValue" data-display-format="percent">
-            </div>
-            <div class="config-help">Blends annual rate vs total commitment for volume tiers (0% = rate-only).</div>
-          </div>
         </div>
       </div>
     </div>
 
-    <div class="panel">
+    <div class="panel lever-panel">
       <h2>Discount Tiers</h2>
+      <div class="config-note">Discount levers. Adjust freely.</div>
       <div class="panel-grid two-col">
         <div class="table-container">
           <div class="table-title">Volume Discount Tiers (keep descending order)</div>
@@ -990,7 +1073,11 @@
         if (inp === source) return;
         const k = inputKey(inp);
         if (k === key) {
-          inp.value = value;
+          if (inp.type === 'checkbox') {
+            inp.checked = !!value;
+          } else {
+            inp.value = value;
+          }
         }
       });
       isSyncing = false;
@@ -999,7 +1086,8 @@
     function handleInputEvent(event) {
       const input = event.target;
       const key = inputKey(input);
-      if (key) syncInputs(key, input.value, input);
+      const value = input.type === 'checkbox' ? input.checked : input.value;
+      if (key) syncInputs(key, value, input);
       update();
       if (input.dataset.path) {
         scheduleConfigSave();
@@ -1208,7 +1296,6 @@
       if (state.ui) {
         setInputClamped(document.getElementById('rateSlider'), state.ui.rate);
         setInputClamped(document.getElementById('durationSlider'), state.ui.duration);
-        setInputClamped(document.getElementById('fleetSlider'), state.ui.existingFleet);
         if (Number.isFinite(state.ui.selectedContract)) selectedContract = state.ui.selectedContract;
       }
       if (!CONTRACT_YEARS.includes(selectedContract)) {
@@ -1217,13 +1304,10 @@
       setActiveContract(selectedContract);
       const rateInput = document.getElementById('rateSlider');
       const durationInput = document.getElementById('durationSlider');
-      const fleetInput = document.getElementById('fleetSlider');
       const rateKey = inputKey(rateInput);
       const durationKey = inputKey(durationInput);
-      const fleetKey = inputKey(fleetInput);
       if (rateKey) syncInputs(rateKey, rateInput.value, rateInput);
       if (durationKey) syncInputs(durationKey, durationInput.value, durationInput);
-      if (fleetKey) syncInputs(fleetKey, fleetInput.value, fleetInput);
       update();
     }
 
@@ -1240,6 +1324,10 @@
 
     function applyInputsToConfig() {
       document.querySelectorAll('[data-path]').forEach(input => {
+        if (input.dataset.type === 'bool') {
+          setByPath(CONFIG, input.dataset.path, !!input.checked);
+          return;
+        }
         const raw = parseFloat(input.value);
         if (!Number.isFinite(raw)) return;
         const scale = parseFloat(input.dataset.scale || '1');
@@ -1264,6 +1352,10 @@
     function setInputsFromConfig() {
       document.querySelectorAll('[data-path]').forEach(input => {
         const value = getByPath(CONFIG, input.dataset.path);
+        if (input.dataset.type === 'bool') {
+          input.checked = !!value;
+          return;
+        }
         if (!Number.isFinite(value)) return;
         const scale = parseFloat(input.dataset.scale || '1');
         const raw = value / scale;
@@ -1291,7 +1383,6 @@
         rate: parseInt(document.getElementById('rateSlider').value),
         duration: parseInt(document.getElementById('durationSlider').value),
         selectedContract: selectedContract,
-        existingFleet: parseInt(document.getElementById('fleetSlider').value),
       };
     }
 
@@ -1399,7 +1490,9 @@
       applyInputsToConfig();
       const rate = parseInt(document.getElementById('rateSlider').value);
       const duration = parseInt(document.getElementById('durationSlider').value);
-      const existingFleet = parseInt(document.getElementById('fleetSlider').value);
+      const existingFleet = (CONFIG.fleet && Number.isFinite(CONFIG.fleet.existingUnits))
+        ? CONFIG.fleet.existingUnits
+        : 0;
       const contractYrs = selectedContract;
 
       // Total commitment = rate × 12 × duration (actual)
@@ -1408,7 +1501,6 @@
 
       document.getElementById('rateValue').textContent = rate;
       document.getElementById('durationValue').textContent = duration;
-      document.getElementById('fleetValue').textContent = existingFleet;
       document.getElementById('totalCommitment').textContent = totalUnits + ' units';
       document.getElementById('discountCommitment').textContent = Math.round(discountUnits) + ' units';
 
@@ -1489,11 +1581,14 @@
       const nextTier = PRICING.getNextVolumeTier(discountUnits);
       const y2List = PRICING.year2ListPrice(rate, duration, contractYrs, existingFleet);
       const savingsPerUnit = y2List * discounts.volume;
+      const currentTierLabel = Number.isFinite(currentTier.maxUnits)
+        ? `${currentTier.minUnits}-${currentTier.maxUnits} units`
+        : `${currentTier.minUnits}+ units`;
 
       let volumeEconHtml = `
         <div class="cost-row"><span>Total Commitment (actual)</span><span>${totalUnits} units</span></div>
         <div class="cost-row"><span>Discount Basis (blended)</span><span>${Math.round(discountUnits)} units</span></div>
-        <div class="cost-row"><span>Current Tier</span><span>${currentTier.minUnits}+ units (${PRICING.formatPercent(currentTier.discount)})</span></div>
+        <div class="cost-row"><span>Current Range</span><span>${currentTierLabel} (${PRICING.formatPercent(currentTier.discount)})</span></div>
         <div class="cost-row"><span>Y2+ Savings per Unit</span><span>$${Math.round(savingsPerUnit)}/yr</span></div>
       `;
 
@@ -1510,21 +1605,26 @@
       document.getElementById('volumeTierEconomics').innerHTML = volumeEconHtml;
 
       // Config summary
-      const maxVolumeDisc = C.discounts.volumeTiers[0].discount;
+      const maxVolumeDisc = Math.max(0, ...C.discounts.volumeTiers.map(t => t.discount));
       const maxContractDisc = Math.max(...Object.values(C.contractDiscounts));
+      const licenseY1List = Number.isFinite(C.licensing.year1List)
+        ? C.licensing.year1List
+        : (Number.isFinite(C.licensing.year1) ? C.licensing.year1 : 0);
+      const licenseY2List = Number.isFinite(C.licensing.year2List)
+        ? C.licensing.year2List
+        : (Number.isFinite(C.licensing.year2Plus) ? C.licensing.year2Plus : 0);
+      const licenseY1Disc = Math.max(0, Math.min(1, Number.isFinite(C.licensing.year1Discount) ? C.licensing.year1Discount : 0));
+      const licenseY2Disc = Math.max(0, Math.min(1, Number.isFinite(C.licensing.year2Discount) ? C.licensing.year2Discount : 0));
       document.getElementById('configSummary').innerHTML = `
         <div class="cost-row"><span>Y1 Base Price</span><span>$${C.pricing.year1FixedPrice}</span></div>
         <div class="cost-row"><span>Y1 Shift Factor</span><span>${Math.round(C.pricing.year1ShiftFactor * 100)}%</span></div>
         <div class="cost-row"><span>Y2+ Margin</span><span>${Math.round(C.pricing.margins.year2Plus * 100)}%</span></div>
-        <div class="cost-row"><span>Y1 Overhead Factor</span><span>${C.pricing.overheadYear1Factor}</span></div>
-        <div class="cost-row"><span>Y1 Overhead Credit Years</span><span>${C.pricing.overheadCreditYears}</span></div>
-        <div class="cost-row"><span>Y2+ Baseline Years</span><span>${C.pricing.year2BaselineYears}</span></div>
-        <div class="cost-row"><span>Y2+ Min Gap</span><span>$${C.pricing.year2MinGap}</span></div>
-        <div class="cost-row"><span>License Price (Y1 / Y2+)</span><span>$${C.licensing.year1} / $${C.licensing.year2Plus}</span></div>
-        <div class="cost-row"><span>Scale Floor</span><span>${Math.round(C.scaleEfficiency.scaleFloor * 100)}%</span></div>
+        <div class="cost-row"><span>License List (Y1 / Y2+)</span><span>$${licenseY1List} / $${licenseY2List}</span></div>
+        <div class="cost-row"><span>License Discount (Y1 / Y2+)</span><span>${Math.round(licenseY1Disc * 100)}% / ${Math.round(licenseY2Disc * 100)}%</span></div>
         <div class="cost-row"><span>Max Volume Discount</span><span>${maxVolumeDisc * 100}%</span></div>
         <div class="cost-row"><span>Y1 Volume Factor</span><span>${C.discounts.year1VolumeFactor * 100}%</span></div>
         <div class="cost-row"><span>Volume Duration Weight</span><span>${Math.round((C.discounts.volumeDurationWeight || 0) * 100)}%</span></div>
+        <div class="cost-row"><span>Overhead Credit</span><span>${C.pricing.overheadCreditEnabled === false ? 'Off' : 'On'}</span></div>
         <div class="cost-row total"><span>Max Contract Discount</span><span>${Math.round(maxContractDisc * 100)}%</span></div>
       `;
 
@@ -1538,13 +1638,13 @@
       const monthlyHardwareCost = rate * C.hardware.fluxBox;
       const laborHoursPerUnit = C.labor.buildHoursPerUnit + supportHoursY1 + C.labor.coordinationHoursPerUnit;
       const monthlyLaborCost = rate * laborHoursPerUnit * C.labor.hourlyRate;
-      const monthlyLicenseRevenue = rate * C.licensing.year1;
+      const monthlyLicenseRevenue = rate * PRICING.licensePriceYear1();
 
       document.getElementById('monthlyFinancials').innerHTML = `
         <div class="cost-row"><span>New Units/Month</span><span>${rate}</span></div>
         <div class="cost-row"><span>Monthly Y1 Revenue</span><span>$${monthlyY1Revenue.toLocaleString()}</span></div>
         <div class="cost-row"><span>Monthly Hardware Cost</span><span>$${Math.ceil(monthlyHardwareCost).toLocaleString()}</span></div>
-        <div class="cost-row"><span>Monthly License Revenue (included)</span><span>$${Math.ceil(monthlyLicenseRevenue).toLocaleString()}</span></div>
+        <div class="cost-row"><span>Monthly License Revenue (net)</span><span>$${Math.ceil(monthlyLicenseRevenue).toLocaleString()}</span></div>
         <div class="cost-row"><span>Monthly Labor Cost</span><span>$${Math.ceil(monthlyLaborCost).toLocaleString()}</span></div>
         <div class="cost-row"><span>Monthly Y1 Cost (total)</span><span>$${Math.ceil(monthlyY1Cost).toLocaleString()}</span></div>
         <div class="cost-row total"><span>Monthly Y1 Profit</span><span class="${marginClass(monthlyY1Profit/monthlyY1Revenue)}">$${Math.ceil(monthlyY1Profit).toLocaleString()}</span></div>
@@ -1601,7 +1701,6 @@
         <div class="cost-row"><span>Rate</span><span>${rate} units/mo</span></div>
         <div class="cost-row"><span>Commitment Duration</span><span>${duration} years</span></div>
         <div class="cost-row"><span>Contract Length</span><span>${contractYrs} years/unit</span></div>
-        <div class="cost-row"><span>Existing Fleet</span><span>${existingFleet.toLocaleString()} units</span></div>
         <div class="cost-row total"><span>Total Commitment</span><span>${totalUnits.toLocaleString()} units</span></div>
         <div class="cost-row"><span>Price per Unit (${contractYrs}yr)</span><span>$${contractTotal.toLocaleString()}</span></div>
         <div class="cost-row"><span>Cost per Unit (${contractYrs}yr)</span><span>$${Math.ceil(unitCost).toLocaleString()}</span></div>

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# Auto-publish GitHub Pages after commit (fluxinc remote).
+# Disable with SRS_DISABLE_AUTO_PUBLISH=1
+
+if [ "${SRS_DISABLE_AUTO_PUBLISH:-}" = "1" ]; then
+  exit 0
+fi
+
+if [ -n "${CI:-}" ]; then
+  exit 0
+fi
+
+if ! git rev-parse --git-dir >/dev/null 2>&1; then
+  exit 0
+fi
+
+branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")
+if [ "$branch" != "master" ]; then
+  exit 0
+fi
+
+if ! git remote get-url fluxinc >/dev/null 2>&1; then
+  exit 0
+fi
+
+echo "Auto-publish: pushing to fluxinc (GitHub Pages)"
+if ! git push fluxinc master; then
+  echo "Auto-publish failed. Run: git push fluxinc master"
+fi

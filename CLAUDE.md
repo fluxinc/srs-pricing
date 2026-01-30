@@ -115,6 +115,8 @@ git push fluxinc master
 Notes:
 - Pages serves from the repo root; `_config.yml` excludes internal docs.
 - Public page: `index.html`. Internal analysis: `margins.html`.
+- Auto-publish on commit is enabled via `.githooks/post-commit` (local Git config: `core.hooksPath=.githooks`).
+- Disable auto-publish with `SRS_DISABLE_AUTO_PUBLISH=1` for a single commit/session.
 
 ## External Tools
 

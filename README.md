@@ -125,17 +125,22 @@ CONFIG = {
   },
 
   licensing: {
-    year1: 1900,                // First-year license price (revenue)
-    year2Plus: 290,             // Annual license price (revenue)
+    year1List: 1900,            // First-year license list price (revenue)
+    year2List: 190,             // Annual license list price (revenue)
+    year1Discount: 0.0,         // First-year license discount
+    year2Discount: 0.0,         // Year 2+ license maintenance discount
   },
 
   pricing: {
     year1FixedPrice: 2400,      // Fixed Year 1 base price (excl. license)
     year1ShiftFactor: 0.0,      // Share of Y1 base shifted into later years
+    listPriceYear1: 4300,       // Fixed list price used for discount labels
+    listPriceYear2: 1600,       // Fixed list price used for discount labels
     margins: {
       year2Plus: 0.20,          // Resale margin
     },
     overheadYear1Factor: 0.0,   // 0 = exclude overhead in Y1
+    overheadCreditEnabled: false, // Allow Y1 surplus to offset Y2+ overhead
     overheadCreditYears: 4,     // Cap Y1 surplus amortization across Y2+ years
     year2BaselineYears: 10,     // Longest term used to set Y2+ minimum price
     year2MinGap: 20,            // Minimum Y2+ per-year gap between contract lengths
@@ -152,21 +157,21 @@ CONFIG = {
   },
 
   discounts: {
-    volumeTiers: [              // Volume commitment tiers
+    volumeTiers: [               // Volume commitment curve control points
       { minUnits: 500, discount: 0.25 },  // 25% off
       { minUnits: 360, discount: 0.20 },  // 20% off
       { minUnits: 240, discount: 0.15 },  // 15% off
       { minUnits: 120, discount: 0.10 },  // 10% off
     ],
-    year1VolumeFactor: 0.5,     // Y1 gets 50% of volume discount
-    volumeDurationWeight: 0.25, // Blend annual units vs total commitment
+    year1VolumeFactor: 0.5,      // Y1 gets 50% of volume discount
+    volumeDurationWeight: 0.25,  // Blend annual units vs total commitment
+  },
 
-    contractDiscounts: {         // Contract length discounts
-      1: 0.00,                   // 1-year: 0%
-      3: 0.02,                   // 3-year: 2%
-      5: 0.06,                   // 5-year: 6%
-      10: 0.07,                  // 10-year: 7%
-    },
+  contractDiscounts: {           // Contract length discounts
+    1: 0.00,                     // 1-year: 0%
+    3: 0.02,                     // 3-year: 2%
+    5: 0.06,                     // 5-year: 6%
+    10: 0.07,                    // 10-year: 7%
   },
 }
 ```
@@ -206,11 +211,11 @@ annualUnits = monthlyRate × 12
 discountUnits = annualUnits × (1 - weight) + (annualUnits × commitYears × weight)
 
 volumeDiscount(totalUnits):
-  500+ units    → 25% off
-  360-499 units → 20% off
-  240-359 units → 15% off
-  120-239 units → 10% off
-  0-119 units   → 0% off
+  tiers = sorted by minUnits, with an implicit 0 units / 0% point
+  find the two surrounding tiers (lower, upper)
+  t = (units - lower.minUnits) / (upper.minUnits - lower.minUnits)
+  discount = lower.discount + t × (upper.discount - lower.discount)
+  (clamped at 0%..100%, capped at the highest tier)
 ```
 
 ### Price Calculations
@@ -220,20 +225,20 @@ volumeDiscount(totalUnits):
 ```javascript
 listY1 = year1FixedPrice
 discountY1 = volumeDiscount × year1VolumeFactor
-baseY1 = roundUp50(listY1 * (1 - discountY1))
+baseY1 = roundUp10(listY1 * (1 - discountY1))
 shiftY1 = baseY1 * year1ShiftFactor
-year1Price = roundUp50((baseY1 - shiftY1) + licenseY1)
+year1Price = roundUp10((baseY1 - shiftY1) + licenseY1)
 ```
 
 **Year 2+ Price**:
 
 ```javascript
 minNetY2 = (avgYear2CostBaseline + avgOverheadBaseline) * (1 + marginY2Plus)
-listY2 = minNetY2 / (1 - (volumeDiscount + contractDiscountBaseline))
+listY2 = minNetY2 / (1 - contractDiscountBaseline)
 discountY2 = volumeDiscount + contractDiscount
-baseY2 = roundUp50(listY2 * (1 - discountY2))
+baseY2 = roundUp10(listY2 * (1 - discountY2))
 shiftY2 = shiftY1 / (contractYears - 1)
-year2Price = roundUp50(baseY2 + licenseY2 + shiftY2)
+year2Price = roundUp10(baseY2 + licenseY2 + shiftY2)
 ```
 
 **Total Contract Price**:
@@ -266,5 +271,5 @@ If `pricing.year2MinGap` is set, Year 2+ per-year prices are enforced to be at l
 All prices round up to nearest $20:
 
 ```javascript
-roundUp50(value) = Math.ceil(value / 20) × 20
+roundUp10(value) = Math.ceil(value / 10) × 10
 ```
