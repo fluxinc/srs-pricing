@@ -18,7 +18,7 @@
       font-size: 14px;
     }
 
-    .container { max-width: 1200px; margin: 0 auto; }
+    .container { max-width: 1200px; margin: 0 auto; padding-bottom: 14rem; }
 
     .header { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
     .logo {
@@ -100,6 +100,7 @@
 
     @media (max-width: 900px) {
       .control-row { grid-template-columns: 1fr; gap: 1rem; }
+      .container { padding-bottom: 18rem; }
     }
 
     .panel {
@@ -114,6 +115,52 @@
       border-color: rgba(232, 66, 0, 0.35);
       box-shadow: inset 0 0 0 1px rgba(232, 66, 0, 0.08);
     }
+
+    .hidden { display: none; }
+
+    .lock-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .lock-card {
+      background: #1c1c1e;
+      border: 1px solid #2c2c2e;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      width: min(360px, 90vw);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+      text-align: left;
+    }
+
+    .lock-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .lock-sub { font-size: 0.8rem; color: #9b9ba0; margin-bottom: 0.75rem; }
+    .lock-field { display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; }
+    .lock-field input[type="password"] {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      border-radius: 8px;
+      border: 1px solid #2c2c2e;
+      background: #121213;
+      color: #f5f5f7;
+      font-size: 0.85rem;
+    }
+    .lock-field button {
+      padding: 0.4rem 0.7rem;
+      border-radius: 8px;
+      border: 1px solid #3a3a3c;
+      background: #2c2c2e;
+      color: #f5f5f7;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+    .lock-field button:hover { background: #3a3a3c; }
+    .lock-error { margin-top: 0.5rem; color: #ff453a; font-size: 0.75rem; }
 
     .panel-grid { display: grid; gap: 0.6rem; }
     .panel-grid .table-container { margin-bottom: 0; }
@@ -188,6 +235,13 @@
       overflow-x: auto;
       margin-bottom: 0.75rem;
       -webkit-overflow-scrolling: touch;
+    }
+
+    .sticky-bottom {
+      position: sticky;
+      bottom: 0.75rem;
+      z-index: 15;
+      box-shadow: 0 -12px 24px rgba(0, 0, 0, 0.35);
     }
 
     .table-title { font-weight: 600; margin-bottom: 0.5rem; font-size: 0.8rem; }
@@ -474,6 +528,18 @@
     </div>
     <p class="subtitle">Cost breakdown, margins, and profitability analysis (2-layer discount model)</p>
     <div class="pin-hint">Tip: Alt+Click any input or panel to pin it while you edit. Panels also have a Pin button.</div>
+
+    <div id="lockOverlay" class="lock-overlay">
+      <div class="lock-card">
+        <div class="lock-title">Margin controls locked</div>
+        <div class="lock-sub">Enter password to edit</div>
+        <div class="lock-field">
+          <input type="password" id="lockPassword" placeholder="Password" autocomplete="current-password">
+          <button type="button" id="unlockButton">Unlock</button>
+        </div>
+        <div id="lockError" class="lock-error hidden">Incorrect password</div>
+      </div>
+    </div>
 
     <div class="commitment-bar">
       <span class="commitment-label">Total Commitment</span>
@@ -836,7 +902,7 @@
       </div>
     </div>
 
-    <div class="table-container">
+    <div class="table-container sticky-bottom">
       <div class="table-title">Per-Unit Pricing (Customer + Profit)</div>
       <table id="customerPricingTable">
         <thead>
@@ -1236,6 +1302,7 @@
 
     function enablePinning() {
       document.addEventListener('click', (event) => {
+        if (document.body.classList.contains('locked')) return;
         if (!event.altKey) return;
         const input = event.target.closest('input');
         if (input) {
@@ -1251,6 +1318,57 @@
           pinPanel(panel);
         }
       });
+    }
+
+    const LOCK_PASSWORD = 'fluxmargins';
+    const LOCK_KEY = 'srs-margins-unlocked';
+
+    function setLocked(locked) {
+      document.body.classList.toggle('locked', locked);
+      const overlay = document.getElementById('lockOverlay');
+      if (overlay) overlay.classList.toggle('hidden', !locked);
+      const controls = document.querySelectorAll('input, button, select, textarea');
+      controls.forEach(el => {
+        if (el.closest('#lockOverlay')) return;
+        if (locked) {
+          el.dataset.wasDisabled = el.disabled ? '1' : '0';
+          el.disabled = true;
+        } else {
+          const wasDisabled = el.dataset.wasDisabled === '1';
+          el.disabled = wasDisabled;
+          delete el.dataset.wasDisabled;
+        }
+      });
+    }
+
+    function initLock() {
+      const unlocked = sessionStorage.getItem(LOCK_KEY) === 'true';
+      setLocked(!unlocked);
+      const unlockButton = document.getElementById('unlockButton');
+      const passwordInput = document.getElementById('lockPassword');
+      const errorEl = document.getElementById('lockError');
+      function tryUnlock() {
+        const value = passwordInput.value || '';
+        if (value === LOCK_PASSWORD) {
+          sessionStorage.setItem(LOCK_KEY, 'true');
+          setLocked(false);
+          passwordInput.value = '';
+          errorEl.classList.add('hidden');
+          return;
+        }
+        errorEl.classList.remove('hidden');
+      }
+      if (unlockButton) {
+        unlockButton.addEventListener('click', tryUnlock);
+      }
+      if (passwordInput) {
+        passwordInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            tryUnlock();
+          }
+        });
+      }
     }
 
     function buildTierRanges() {
@@ -1925,6 +2043,7 @@
       update();
     }
 
+    initLock();
     init();
 
     if (stateChannel) {
